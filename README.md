@@ -1,6 +1,6 @@
 Contributors
 ------------
-Parul Awasthy <mailto:pawasthy@gatech.edu>
+Parul Awasthy <pawasthy@gatech.edu>
 
 Young Jin Kim <ykim362@gatech.edu>
 
