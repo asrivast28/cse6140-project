@@ -12,13 +12,12 @@ cxxFlags = [
             ]
 
 cxxLibs = [
-           'boost_filesystem',
            'boost_program_options',
-           'boost_system',
            ]
 
-
 srcFiles = [
+            'ProgramOptions.cpp',
+            'TSPInstance.cpp',
             'driver.cpp',
             ]
 
