@@ -5,14 +5,14 @@
 
 ProgramOptions::ProgramOptions(
 ) : m_desc("TSP solver options"),
-  m_algorithmType(),
+  m_algorithm(),
   m_instanceFile(),
   m_cutoffTime(0.0)
 {
   po::options_description desc;
   m_desc.add_options()
     ("help,h", "Print this message.")
-    ("alg", po::value<std::string>(&m_algorithmType), "Algorithm to be used for solving.")
+    ("alg", po::value<std::string>(&m_algorithm), "Algorithm to be used for solving.")
     ("inst", po::value<std::string>(&m_instanceFile), "TSP instance file.")
     ("time", po::value<double>(&m_cutoffTime), "Cutoff time (in minutes).")
     ;

@@ -18,7 +18,7 @@ public:
   parse(int, char**);
 
   std::string
-  algorithmType() const { return m_algorithmType; }
+  algorithm() const { return m_algorithm; }
 
   std::string
   instanceFile() const { return m_instanceFile; }
@@ -28,7 +28,7 @@ public:
   
 private:
   po::options_description m_desc;
-  std::string m_algorithmType;
+  std::string m_algorithm;
   std::string m_instanceFile;
   double m_cutoffTime;
 }; // class ProgramOptions

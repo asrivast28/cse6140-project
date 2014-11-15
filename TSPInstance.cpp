@@ -1,5 +1,7 @@
 #include "TSPInstance.hpp"
 
+#include <iostream>
+
 TSPInstance::TSPInstance(
   const std::string& fileName
 ) : m_coordinates(),
