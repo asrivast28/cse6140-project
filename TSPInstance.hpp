@@ -15,14 +15,16 @@ public:
   std::string
   name() const { return m_name; }
 
-  unsigned int
+  unsigned
   optimalCost() const { return m_optimalCost; }
 
-  unsigned int
-  dimension() const { return m_coordinates.size(); }
+  unsigned
+  dimension() const { return m_dimension; }
 
-  std::vector<std::vector<unsigned int> >
+  std::vector<std::vector<unsigned> >
   distanceMatrix() const;
+
+  ~TSPInstance() { }
 
 private:
   enum EdgeWeightType {
@@ -32,7 +34,7 @@ private:
 
 private:
   template <EdgeWeightType>
-  unsigned int
+  unsigned
   distance(
     const std::array<double, 2>&,
     const std::array<double, 2>&
@@ -42,7 +44,8 @@ private:
 private:
   std::vector<std::array<double, 2> > m_coordinates;
   std::string m_name;
-  unsigned int m_optimalCost;
+  unsigned m_dimension;
+  unsigned m_optimalCost;
   EdgeWeightType m_edgeWeightType;
 }; // class TSPInstance
 

@@ -13,11 +13,14 @@ cxxFlags = [
 
 cxxLibs = [
            'boost_program_options',
+           'boost_timer',
+           'boost_system',
            ]
 
 srcFiles = [
             'ProgramOptions.cpp',
             'TSPInstance.cpp',
+            'ApproximationAlgorithm.cpp',
             'driver.cpp',
             ]
 

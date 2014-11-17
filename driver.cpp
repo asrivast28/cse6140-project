@@ -1,4 +1,6 @@
+#include "AlgorithmImplementations.hpp"
 #include "ProgramOptions.hpp"
+#include "Timer.hpp"
 #include "TSPInstance.hpp"
 
 #include <iostream>
@@ -9,6 +11,7 @@ main(
   char** argv
 )
 {
+  Timer timer;
   ProgramOptions options;
   try {
     options.parse(argc, argv);
@@ -19,13 +22,13 @@ main(
   }
 
   TSPInstance tsp(options.instanceFile());
-  tsp.distanceMatrix();
 
   std::string algorithm = options.algorithm();
 
   if (algorithm == "BnB") {
   }
   else if (algorithm == "Approx") {
+    approximateTourCost(tsp.dimension(), tsp.distanceMatrix());
   }
   else if (algorithm == "Heur") {
   }

@@ -8,7 +8,7 @@
 namespace po = boost::program_options;
 
 /**
- * This is a utility class for parsing command line arguments.
+ * Utility class for parsing command line arguments.
  */
 class ProgramOptions {
 public:
@@ -25,6 +25,8 @@ public:
 
   double
   cutoffTime() const { return m_cutoffTime; }
+
+  ~ProgramOptions() { }
   
 private:
   po::options_description m_desc;
