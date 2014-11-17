@@ -24,6 +24,9 @@ srcFiles = [
             'driver.cpp',
             ]
 
+cppDefs = [
+           ]
+
 debug = ARGUMENTS.get('DEBUG', 0)
 
 targetName = 'tspsolver'
@@ -32,13 +35,14 @@ buildDir = 'build'
 
 if debug in [0, '0']:
     cxxFlags.append('-O3')
+    cppDefs.append('NDEBUG')
     buildDir = 'release'
 else:
     cxxFlags.append('-g')
     buildDir = 'debug'
     targetName += '_debug'
 
-env = Environment(CXX = 'g++', CXXFLAGS = cxxFlags, CPPPATH = cppPaths)
+env = Environment(CXX = 'g++', CXXFLAGS = cxxFlags, CPPPATH = cppPaths, CPPDEFINES = cppDefs)
 
 buildDir = os.path.join('builds', buildDir)
 env.VariantDir(buildDir, '.', duplicate = 0)

@@ -54,6 +54,14 @@ TSPInstance::TSPInstance(
   }
 }
 
+/**
+ * @brief Calculated distance between two EUC_2D coordinates.
+ *
+ * @param coord1   First EUC_2D coordinate.
+ * @param coord2   Second EUC_2D coordinate.
+ *
+ * @return The calculated distance. 
+ */
 template <>
 unsigned
 TSPInstance::distance<TSPInstance::EUC_2D>(
@@ -78,6 +86,14 @@ convert(
   return PI * (deg + 5.0 * min / 3.0) / 180.0;
 }
 
+/**
+ * @brief Calculates distance, in kilometers, between two GEO coordinates.
+ *
+ * @param coord1   First GEO coordinate.
+ * @param coord2   Second GEO coordinate.
+ *
+ * @return The calculated distance. 
+ */
 template <>
 unsigned
 TSPInstance::distance<TSPInstance::GEO>(
@@ -93,6 +109,9 @@ TSPInstance::distance<TSPInstance::GEO>(
   return static_cast<unsigned> (RRR * std::acos(0.5 * ((1.0 + q1) * q2 - (1.0 - q1) * q3)) + 1.0);
 }
 
+/**
+ * Returns a 1-indexed distance matrix for this TSP instance.
+ */
 std::vector<std::vector<unsigned> >
 TSPInstance::distanceMatrix(
 ) const
