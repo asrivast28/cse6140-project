@@ -8,6 +8,9 @@
 #ifndef BRANCHANDBOUND_HPP_
 #define BRANCHANDBOUND_HPP_
 
+#include "Edge.hpp"
+#include "TreeNode.hpp"
+
 class BranchAndBound {
 public:
 	BranchAndBound(const TSPInstance& data);

@@ -10,37 +10,37 @@
 
 class Edge {
 public:
-	Edge(int node1, int node2, double distance) {
-		this->node1 = node1;
-		this->node2 = node2;
-		this->distance = distance;
+	Edge(int node1, int node2, unsigned distance) {
+		m_node1 = node1;
+		m_node2 = node2;
+		m_distance = distance;
 	}
 
 	int getAnyNode() {
-		return this->node1;
+		return m_node1;
 	}
 
 	int getTheOther() {
-		return this->node2;
+		return m_node2;
 	}
 
 	int getTheOther(int thisNode) {
-		if (this->node1 == thisNode)
-			return this->node2;
+		if (m_node1 == thisNode)
+			return m_node2;
 		else
-			return this->node1;
+			return m_node1;
 	}
 
-	double getDistance() {
-		return this->distance;
+	unsigned getDistance() {
+		return m_distance;
 	}
-
 
 private:
-	final int node1;
-	final int node2;
+	int m_node1;
+	int m_node2;
 
-	final double distance;
+	unsigned m_distance;
+
 
 };
 

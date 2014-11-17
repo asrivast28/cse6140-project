@@ -15,7 +15,7 @@ BranchAndBound::BranchAndBound(const TSPInstance& tsp) {
 	this->m_numGeneratedNodes = 0;
 	this->m_numPrunedNodes = 0;
 
-	std::vector<std::vector<double>> distances = tsp.distanceMatrix();
+	std::vector<std::vector<unsigned>> distances = tsp.distanceMatrix();
 
 	// Initialize the edge list
 	m_listEdges = new std::vector<Edge>(m_dimension);
