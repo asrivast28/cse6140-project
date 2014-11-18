@@ -8,10 +8,10 @@
 #ifndef BRANCHANDBOUND_HPP_
 #define BRANCHANDBOUND_HPP_
 
-#include "Edge.hpp"
 #include "TreeNode.hpp"
 
 class BranchAndBound {
+
 public:
 	BranchAndBound(const TSPInstance& data);
 
@@ -27,7 +27,7 @@ private:
 	int m_numGeneratedNodes;
 	int m_numPrunedNodes;
 
-	std::vector<Edge> m_listEdges;
+
 
 	void
 	branchAndBound(TreeNode& node, int idxEdge);

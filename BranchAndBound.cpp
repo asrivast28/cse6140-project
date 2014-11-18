@@ -18,14 +18,14 @@ BranchAndBound::BranchAndBound(const TSPInstance& tsp) {
 	std::vector<std::vector<unsigned>> distances = tsp.distanceMatrix();
 
 	// Initialize the edge list
-	m_listEdges = new std::vector<Edge>(m_dimension);
+	TreeNode::s_listEdges = new std::vector<Edge>(m_dimension);
 	for (int ii = 1; ii <= m_dimension; ii++) {
 		for (int jj = ii + 1; jj < m_dimension; jj++) {
 			Edge newEdge(ii, jj, (distances.at(ii)).at(jj));
-			m_listEdges.push_back(newEdge);
+			TreeNode::s_listEdges.push_back(newEdge);
 
 			Edge inverseEdge(-ii, -jj, (distances.at(ii)).at(jj));
-			m_listEdges.push_back(inverseEdge);
+			TreeNode::s_listEdges.push_back(inverseEdge);
 		}
 	}
 
@@ -50,7 +50,7 @@ BranchAndBound::solve() {
 void
 BranchAndBound::branchAndBound(TreeNode& node, int idxEdge) {
 
-	if (idxEdge >= m_listEdges.size()) {
+	if (idxEdge >= TreeNode::s_listEdges.size()) {
 		return;
 	}
 
@@ -81,14 +81,12 @@ BranchAndBound::branchAndBound(TreeNode& node, int idxEdge) {
 			idxEdge++;
 		}
 
-		if (idxEdge >= m_listEdges.size()) {
+		if (idxEdge >= TreeNode::s_listEdges.size()) {
 			delete leftChild;
 			return;
 		}
 
-		Edge leftAddEdge = m_listEdges.at(idxEdge);
-
-		int idxLeftEdge = leftChild->addEdge(leftAddEdge, idxEdge);
+		int idxLeftEdge = leftChild->addEdge(idxEdge);
 		leftChild->expand();
 		leftChild->calcLowerBound();
 
@@ -103,7 +101,7 @@ BranchAndBound::branchAndBound(TreeNode& node, int idxEdge) {
 		TreeNode* rightChild = new TreeNode(m_dimension);
 		m_numGeneratedNodes++;
 		rightChild->setConstraint(node.getConstraint());
-		if (idxLeftEdge >= m_listEdges.size()) {
+		if (idxLeftEdge >= TreeNode::s_listEdges.size()) {
 			if (leftChild != nullptr) {
 				delete leftChild;
 			}
@@ -115,9 +113,7 @@ BranchAndBound::branchAndBound(TreeNode& node, int idxEdge) {
 			return;
 		}
 
-		Edge rightAddEdge = m_listEdges.at(idxLeftEdge + 1);
-
-		int idxRightEdge = rightChild->addEdge(rightAddEdge, idxLeftEdge + 1);
+		int idxRightEdge = rightChild->addEdge(idxLeftEdge + 1);
 		rightChild->expand();
 		rightChild->calcLowerBound();
 
