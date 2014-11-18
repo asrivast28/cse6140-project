@@ -59,8 +59,8 @@ mstPrim(
   bh::fibonacci_heap<node, bh::compare<compare_node> > heap;
   typedef bh::fibonacci_heap<node, bh::compare<compare_node> >::handle_type node_handle;  
   std::map<unsigned, node_handle> heap_elements;
-  for (unsigned i = 0; i < dimension; ++i) {
-    heap_elements.insert(std::make_pair(i+1, heap.push(node(i+1))));
+  for (unsigned i = 1; i <= dimension; ++i) {
+    heap_elements.insert(std::make_pair(i, heap.push(node(i))));
   }
 
   std::vector<std::vector<unsigned> > mst(dimension + 1);
@@ -134,10 +134,10 @@ tour(
   preorderWalk(mst, root, tour);
 
   unsigned approximateCost = 0;
-  for (unsigned i = 1; i < dimension; ++i) {
+  for (unsigned i = 0; i < (dimension - 1); ++i) {
     approximateCost += distanceMatrix[tour[i]][tour[i+1]];
   }
-  approximateCost += distanceMatrix[tour[1]][tour[dimension]];
+  approximateCost += distanceMatrix[tour[0]][tour[dimension-1]];
   return approximateCost;
 }
 

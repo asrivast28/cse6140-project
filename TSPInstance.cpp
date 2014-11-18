@@ -81,7 +81,7 @@ convert(
 )
 {
   const double PI = 3.141592;
-  double deg = std::round(x);
+  double deg = static_cast<int>(x);
   double min = x - deg;
   return PI * (deg + 5.0 * min / 3.0) / 180.0;
 }
