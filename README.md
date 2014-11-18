@@ -28,3 +28,6 @@ The executable can be run as follows:
 ```
 ./tspsolver[_debug] --alg [BnB | Approx | Heur| LS1 | LS2] --inst <filename.tsp> [--time <cutoff (in minutes)>]
 ```
+
+## Report
+The read only version of report, on WriteLatex, can be found [here](https://www.writelatex.com/read/cvjxrgtrmydx).

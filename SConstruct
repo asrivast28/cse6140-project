@@ -12,6 +12,7 @@ cxxFlags = [
             ]
 
 cxxLibs = [
+           'boost_filesystem',
            'boost_program_options',
            'boost_timer',
            'boost_system',

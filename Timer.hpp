@@ -16,10 +16,10 @@ public:
   reset() { m_timer.start(); }
 
   void
-  setCutoff(const double cutoff) { m_cutoff = cutoff * 60 * 1e9; }
+  setCutoff(const double cutoff) { m_cutoff = cutoff * 1e9; }
 
   double
-  remaining() const { return ((m_cutoff - m_timer.elapsed().wall) / 60.0) * 1e-9; }
+  remaining() const { return (m_cutoff - m_timer.elapsed().wall) * 1e-9; }
 
   ~Timer() { }
 

@@ -23,8 +23,11 @@ public:
   std::string
   instanceFile() const { return m_instanceFile; }
 
-  double
+  unsigned 
   cutoffTime() const { return m_cutoffTime; }
+
+  unsigned
+  randomSeed() const { return m_randomSeed; }
 
   ~ProgramOptions() { }
   
@@ -32,7 +35,8 @@ private:
   po::options_description m_desc;
   std::string m_algorithm;
   std::string m_instanceFile;
-  double m_cutoffTime;
+  unsigned m_cutoffTime;
+  unsigned m_randomSeed;
 }; // class ProgramOptions
 
 #endif // PROGRAMOPTIONS_HPP_
