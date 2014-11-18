@@ -7,7 +7,7 @@
 namespace tsp {
 
 namespace approx {
-unsigned tourCost(const unsigned, const std::vector<std::vector<unsigned> >&);
+unsigned tour(const unsigned, const std::vector<std::vector<unsigned> >&, std::vector<unsigned>&);
 } // namespace approx
 
 } // namespace tsp

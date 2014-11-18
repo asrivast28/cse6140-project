@@ -3,7 +3,11 @@
 #include "Timer.hpp"
 #include "TSPInstance.hpp"
 
+#include <fstream>
 #include <iostream>
+#include <sstream>
+
+#include <boost/filesystem.hpp>
 
 int
 main(
@@ -24,23 +28,46 @@ main(
   TSPInstance tsp(options.instanceFile());
 
   std::string algorithm = options.algorithm();
+
+  std::vector<unsigned> tour;
   unsigned tourCost = 0;
+  bool deterministic = true;
 
   if (algorithm == "BnB") {
   }
   else if (algorithm == "Approx") {
-    tourCost = tsp::approx::tourCost(tsp.dimension(), tsp.distanceMatrix());
+    tourCost = tsp::approx::tour(tsp.dimension(), tsp.distanceMatrix(), tour);
   }
   else if (algorithm == "Heur") {
   }
   else if (algorithm == "LS1") {
+    deterministic = false;
   }
   else if (algorithm == "LS2") {
+    deterministic = false;
   }
   else {
     std::cerr << "Unknown algorithm type '" << algorithm << "'." << std::endl;
     return 1;
   }
+
+  assert(tour.size() == tsp.dimension());
+
+  std::stringstream solnFileName;
+  solnFileName << boost::filesystem::path(options.instanceFile()).stem().string();
+  solnFileName << "_" << algorithm << "_" << options.cutoffTime();
+  if (!deterministic) {
+    solnFileName << "_" << options.randomSeed();
+  }
+  solnFileName << ".sol";
+
+  std::ofstream solnFile(solnFileName.str());
+
+  solnFile << tourCost << std::endl;
+  for (unsigned i = 0; i < (tsp.dimension() - 1); ++i) {
+    solnFile << tour[i] << ",";
+  }
+  solnFile << tour[tsp.dimension() - 1];
 
   std::cout << "Optimal tour cost is: " << tsp.optimalCost() << std::endl;
   std::cout << "Estimated tour cost is: " << tourCost << std::endl;

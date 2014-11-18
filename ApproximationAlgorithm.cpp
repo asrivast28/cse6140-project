@@ -118,26 +118,26 @@ preorderWalk(
  *
  * @param dimension        Dimension of the TSP instance.
  * @param distanceMatrix   Distance matrix for the TSP instance.
+ * @param tour             The tour computed by the algorithm.
  *
  * @return Calculated approximate cost of the tour. 
  */
 unsigned
-tourCost(
+tour(
   const unsigned dimension,
-  const std::vector<std::vector<unsigned> >& distanceMatrix
+  const std::vector<std::vector<unsigned> >& distanceMatrix,
+  std::vector<unsigned>& tour
 )
 {
   const unsigned root = 1;
   std::vector<std::vector<unsigned> > mst(mstPrim(dimension, root, distanceMatrix));
-  std::vector<unsigned> walk;
-  preorderWalk(mst, root, walk);
-  assert(walk.size() == dimension);
+  preorderWalk(mst, root, tour);
 
   unsigned approximateCost = 0;
   for (unsigned i = 1; i < dimension; ++i) {
-    approximateCost += distanceMatrix[walk[i]][walk[i+1]];
+    approximateCost += distanceMatrix[tour[i]][tour[i+1]];
   }
-  approximateCost += distanceMatrix[walk[1]][walk[dimension]];
+  approximateCost += distanceMatrix[tour[1]][tour[dimension]];
   return approximateCost;
 }
 
