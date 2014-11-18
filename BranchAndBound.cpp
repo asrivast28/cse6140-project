@@ -2,80 +2,102 @@
  * BranchAndBound.cpp
  *
  *  Created on: Nov 15, 2014
- *      Author: ykim
+ *  Author: Parul Awasthy (<pawasthy@gatech.edu>)
+ * 			Young Jin Kim (<ykim362@gatech.edu>)
+ * 			Ankit Srivastava (<asrivast@gatech.edu>)
  */
 
+#include <limits>
 #include "BranchAndBound.hpp"
 
 BranchAndBound::BranchAndBound(const TSPInstance& tsp) {
 
 	// Initialize member variables
 	this->m_dimension = tsp.dimension();
-	this->m_bestCost = std::numeric_limits<int>::max();
+	this->m_bestCost = std::numeric_limits<unsigned>::max();
 	this->m_numGeneratedNodes = 0;
 	this->m_numPrunedNodes = 0;
+	this->m_bestNode = nullptr;
 
 	std::vector<std::vector<unsigned>> distances = tsp.distanceMatrix();
 
 	// Initialize the edge list
-	TreeNode::s_listEdges = new std::vector<Edge>(m_dimension);
-	for (int ii = 1; ii <= m_dimension; ii++) {
-		for (int jj = ii + 1; jj < m_dimension; jj++) {
-			Edge newEdge(ii, jj, (distances.at(ii)).at(jj));
+//	TreeNode::s_listEdges = new std::vector<Edge>(m_dimension);
+	for (unsigned ii = 1; ii <= m_dimension; ii++) {
+
+		std::vector<unsigned> oneRow(m_dimension);
+
+		for (unsigned jj = ii + 1; jj < m_dimension; jj++) {
+			unsigned distance = distances[ii][jj];
+
+			Edge newEdge(ii, jj, distance);
 			TreeNode::s_listEdges.push_back(newEdge);
 
-			Edge inverseEdge(-ii, -jj, (distances.at(ii)).at(jj));
+			Edge inverseEdge(-ii, -jj, distance);
 			TreeNode::s_listEdges.push_back(inverseEdge);
+
+			// Distances
+			oneRow.push_back(distance);
 		}
+
+		TreeNode::s_distances.push_back(oneRow);
 	}
 
 }
 
-double
+unsigned
 BranchAndBound::solve() {
 
 	// Create root node
-	TreeNode root(m_dimension);
+	TreeNode* root = new TreeNode(m_dimension);
 	m_numGeneratedNodes++;
 
-	root.calcLowerBound();
+	root->calcLowerBound();
 
 	// Call recursive branch and bound routine
-	branchAndBound(root, -1);
+	branchAndBound(root, std::numeric_limits<unsigned>::max());
+	if (!root->getAlive()) {
+		delete root;
+	}
 
 	return m_bestCost;
 }
 
 
 void
-BranchAndBound::branchAndBound(TreeNode& node, int idxEdge) {
+BranchAndBound::branchAndBound(TreeNode* node, unsigned idxEdge) {
 
 	if (idxEdge >= TreeNode::s_listEdges.size()) {
 		return;
 	}
 
 	// Update upper bound
-	if (node.isSolution()) {
-		node.recordSolution();
+	if (node->isSolution()) {
+		node->recordSolution();
 
-		if (node.getCost() < m_bestCost) {
-			m_bestCost = node.getCost();
+		if (node->getCost() < m_bestCost) {
+			m_bestCost = node->getCost();
+
+			if (m_bestNode != nullptr) {
+				delete m_bestNode;
+			}
 			m_bestNode = node;
+			m_bestNode->setAlive(true);
 
 			return;
 		}
 	}
 
 	// Branch..
-	if (node.getLowerBound() < 2*m_bestCost) {
+	if (node->getLowerBound() < 2*m_bestCost) {
 
 		// Left child node
 		TreeNode* leftChild = new TreeNode(m_dimension);
 		m_numGeneratedNodes++;
 
-		leftChild->setConstraint(node.getConstraint());
+		leftChild->setConstraint(node->getConstraint());
 
-		if (idxEdge != -1 && idxEdge % 2 == 1) {
+		if (idxEdge != std::numeric_limits<unsigned>::max() && idxEdge % 2 == 1) {
 			idxEdge += 2;
 		} else {
 			idxEdge++;
@@ -86,7 +108,7 @@ BranchAndBound::branchAndBound(TreeNode& node, int idxEdge) {
 			return;
 		}
 
-		int idxLeftEdge = leftChild->addEdge(idxEdge);
+		unsigned idxLeftEdge = leftChild->addEdge(idxEdge);
 		leftChild->expand();
 		leftChild->calcLowerBound();
 
@@ -100,7 +122,7 @@ BranchAndBound::branchAndBound(TreeNode& node, int idxEdge) {
 		// Right child node
 		TreeNode* rightChild = new TreeNode(m_dimension);
 		m_numGeneratedNodes++;
-		rightChild->setConstraint(node.getConstraint());
+		rightChild->setConstraint(node->getConstraint());
 		if (idxLeftEdge >= TreeNode::s_listEdges.size()) {
 			if (leftChild != nullptr) {
 				delete leftChild;
@@ -126,13 +148,13 @@ BranchAndBound::branchAndBound(TreeNode& node, int idxEdge) {
 
 		// Expand tree
 		if (leftChild != nullptr && rightChild == nullptr) {
-			branchAndBound(*leftChild, idxLeftEdge);
+			branchAndBound(leftChild, idxLeftEdge);
 		} else if (rightChild != nullptr && leftChild == nullptr) {
-			branchAndBound(*rightChild, idxRightEdge);
+			branchAndBound(rightChild, idxRightEdge);
 		} else if (leftChild != nullptr && rightChild != nullptr
 				&& leftChild->getLowerBound() <= rightChild->getLowerBound()) {
 			if (leftChild->getLowerBound() < 2*m_bestCost) {
-				branchAndBound(*leftChild, idxLeftEdge);
+				branchAndBound(leftChild, idxLeftEdge);
 			} else {
 				delete leftChild;
 				leftChild = nullptr;
@@ -140,7 +162,7 @@ BranchAndBound::branchAndBound(TreeNode& node, int idxEdge) {
 			}
 
 			if (rightChild->getLowerBound() < 2*m_bestCost) {
-				branchAndBound(*rightChild, idxRightEdge);
+				branchAndBound(rightChild, idxRightEdge);
 			}
 			else {
 				delete rightChild;
@@ -149,7 +171,7 @@ BranchAndBound::branchAndBound(TreeNode& node, int idxEdge) {
 			}
 		} else if (rightChild != nullptr) {
 			if (rightChild->getLowerBound() < 2*m_bestCost) {
-				branchAndBound(*rightChild, idxRightEdge);
+				branchAndBound(rightChild, idxRightEdge);
 			}
 			else {
 				delete rightChild;
@@ -158,7 +180,7 @@ BranchAndBound::branchAndBound(TreeNode& node, int idxEdge) {
 			}
 
 			if (leftChild->getLowerBound() < 2*m_bestCost) {
-				branchAndBound(*leftChild, idxLeftEdge);
+				branchAndBound(leftChild, idxLeftEdge);
 			} else {
 				delete leftChild;
 				leftChild = nullptr;
@@ -167,11 +189,11 @@ BranchAndBound::branchAndBound(TreeNode& node, int idxEdge) {
 		}
 
 
-		if (leftChild != nullptr) {
+		if (leftChild != nullptr && !leftChild->getAlive()) {
 			delete leftChild;
 		}
 
-		if (rightChild != nullptr) {
+		if (rightChild != nullptr && !rightChild->getAlive()) {
 			delete rightChild;
 		}
 	}

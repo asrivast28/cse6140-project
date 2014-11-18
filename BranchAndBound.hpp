@@ -2,12 +2,15 @@
  * BranchAndBound.hpp
  *
  *  Created on: Nov 15, 2014
- *      Author: ykim
+ *  Author: Parul Awasthy (<pawasthy@gatech.edu>)
+ * 			Young Jin Kim (<ykim362@gatech.edu>)
+ * 			Ankit Srivastava (<asrivast@gatech.edu>)
  */
 
 #ifndef BRANCHANDBOUND_HPP_
 #define BRANCHANDBOUND_HPP_
 
+#include "TSPInstance.hpp"
 #include "TreeNode.hpp"
 
 class BranchAndBound {
@@ -15,22 +18,22 @@ class BranchAndBound {
 public:
 	BranchAndBound(const TSPInstance& data);
 
-	double
+	unsigned
 	solve();
 
 private:
-	int m_dimension;
+	unsigned m_dimension;
 
-	double m_bestCost;
-	TreeNode m_bestNode;
+	unsigned m_bestCost;
+	TreeNode* m_bestNode;
 
-	int m_numGeneratedNodes;
-	int m_numPrunedNodes;
+	unsigned m_numGeneratedNodes;
+	unsigned m_numPrunedNodes;
 
 
 
 	void
-	branchAndBound(TreeNode& node, int idxEdge);
+	branchAndBound(TreeNode* node, unsigned idxEdge);
 
 };
 

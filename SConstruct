@@ -22,6 +22,8 @@ srcFiles = [
             'ProgramOptions.cpp',
             'TSPInstance.cpp',
             'ApproximationAlgorithm.cpp',
+            'TreeNode.cpp',
+            'BranchAndBound.cpp',
             'driver.cpp',
             ]
 

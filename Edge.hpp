@@ -2,7 +2,9 @@
  * Edge.hpp
  *
  *  Created on: Nov 16, 2014
- *      Author: ykim
+ *  Author: Parul Awasthy (<pawasthy@gatech.edu>)
+ * 			Young Jin Kim (<ykim362@gatech.edu>)
+ * 			Ankit Srivastava (<asrivast@gatech.edu>)
  */
 
 #ifndef EDGE_HPP_
@@ -10,6 +12,13 @@
 
 class Edge {
 public:
+
+	Edge() {
+		m_node1 = 0;
+		m_node2 = 0;
+		m_distance = 0;
+	}
+
 	Edge(int node1, int node2, unsigned distance) {
 		m_node1 = node1;
 		m_node2 = node2;
@@ -33,6 +42,14 @@ public:
 
 	unsigned getDistance() {
 		return m_distance;
+	}
+
+	Edge& operator=(Edge arg) {
+	    this->m_node1 = arg.m_node1;
+	    this->m_node2 = arg.m_node2;
+	    this->m_distance = arg.m_distance;
+
+	    return *this;
 	}
 
 private:

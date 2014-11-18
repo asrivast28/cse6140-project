@@ -2,20 +2,25 @@
  * TreeNode.hpp
  *
  *  Created on: Nov 16, 2014
- *      Author: ykim
+ *  Author: Parul Awasthy (<pawasthy@gatech.edu>)
+ * 			Young Jin Kim (<ykim362@gatech.edu>)
+ * 			Ankit Srivastava (<asrivast@gatech.edu>)
  */
 
 #ifndef TREENODE_HPP_
 #define TREENODE_HPP_
 
+#include <vector>
 #include "Edge.hpp"
 
 class TreeNode {
 public:
 	static std::vector<Edge> s_listEdges;
 
+	static std::vector<std::vector<unsigned>> s_distances;
+
 public:
-	TreeNode(int size);
+	TreeNode(unsigned size);
 
 	void
 	calcLowerBound();
@@ -26,10 +31,10 @@ public:
 	void
 	recordSolution();
 
-	double
+	unsigned
 	getCost();
 
-	double
+	unsigned
 	getLowerBound();
 
 	void
@@ -38,11 +43,24 @@ public:
 	std::vector<std::vector<char>>
 	getConstraint();
 
-	int
-	addEdge(int idxEdge);
+	unsigned
+	addEdge(unsigned idxEdge);
 
 	void
 	expand();
+
+	void
+	setAlive(bool alive) {
+		m_alive = alive;
+	}
+
+	bool
+	getAlive() {
+		return m_alive;
+	}
+
+private:
+	static unsigned MAX_UINT;
 
 private:
 	unsigned
@@ -51,8 +69,30 @@ private:
 	std::vector<std::vector<char>>
 	m_constraint;
 
+	std::vector<unsigned>
+	m_tripSoFar;
+
+	unsigned
+	m_totalCost;
+
+	unsigned
+	m_lowerBound;
+
+	std::vector<unsigned>
+	m_travelPath;
+
+	bool
+	m_alive;
+
+
 	void
 	setIndConstraint(unsigned city1, unsigned city2, char val);
+
+	unsigned
+	checkCycle(unsigned city1, unsigned city2);
+
+	void
+	findSmallestTwo(const std::vector<unsigned>& costOfNode, unsigned& smallest, unsigned& secondSmallest);
 
 };
 
