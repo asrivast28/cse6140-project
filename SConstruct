@@ -21,7 +21,7 @@ cxxLibs = [
 srcFiles = [
             'ProgramOptions.cpp',
             'TSPInstance.cpp',
-            'ApproximationAlgorithm.cpp',
+            'MSTApproximation.cpp',
             'TreeNode.cpp',
             'BranchAndBound.cpp',
             'driver.cpp',

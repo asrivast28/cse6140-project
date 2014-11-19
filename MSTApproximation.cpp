@@ -1,23 +1,18 @@
-#include "AlgorithmImplementations.hpp"
+#include "MSTApproximation.hpp"
 
-#include <cassert>
 #include <map>
 #include <numeric>
-#include <vector>
 
 #include <boost/heap/fibonacci_heap.hpp>
 
 namespace bh = boost::heap;
 
-namespace tsp {
-namespace approx {
-
-const unsigned PLUS_INFINITY = std::numeric_limits<unsigned>::max();
+const unsigned MSTApproximation::PLUS_INFINITY = std::numeric_limits<unsigned>::max();
 
 /**
  * Structure for representing nodes, while constructing MST.
  */
-struct node {
+struct MSTApproximation::node {
   node(unsigned i)
     : id(i), key(PLUS_INFINITY), parent(0)
   { }
@@ -32,38 +27,60 @@ struct node {
  * The comparison operator is inverted so that we
  * can create min-heap from max-heap implementation.
  */
-struct compare_node {
+struct MSTApproximation::compare_node {
   bool operator()(const node& n1, const node& n2) const
   {
     return (n1.key > n2.key);
   }
 };
 
+MSTApproximation::MSTApproximation(
+  const std::vector<std::vector<unsigned> > distanceMatrix, 
+  const unsigned dimension
+) : m_distanceMatrix(distanceMatrix),
+  m_dimension(dimension)
+{
+}
+
+/**
+ * @brief Computes approximate tour cost for the given TSP.
+ *
+ * @param tour             The tour computed by the algorithm.
+ *
+ * @return Calculated approximate cost of the tour. 
+ */
+unsigned
+MSTApproximation::getTour(
+  std::vector<unsigned>& tour
+) const
+{
+  const unsigned root = 1;
+  std::vector<std::vector<unsigned> > mst(primMST(root));
+  unsigned tourCost = preorderWalk(mst, root, tour);
+  tourCost += m_distanceMatrix[tour[0]][tour[m_dimension-1]];
+  return tourCost;
+}
+
 /**
  * @brief Returns a minimum spanning tree of the graph, computed using Prim's algorithm.
  *
- * @param dimension        Dimension of the graph.
  * @param root             Root node for finding MST.
- * @param distanceMatrix   Matrix which stores distance of each node to every other node.
  *
  * @return 1-indexed vector which represents the computed MST. 
  */
-static
 std::vector<std::vector<unsigned> >
-mstPrim(
-  const unsigned dimension,
-  const unsigned root,
-  const std::vector<std::vector<unsigned> >& distanceMatrix
-)
+MSTApproximation::primMST(
+  const unsigned root
+) const
 {
   bh::fibonacci_heap<node, bh::compare<compare_node> > heap;
   typedef bh::fibonacci_heap<node, bh::compare<compare_node> >::handle_type node_handle;  
   std::map<unsigned, node_handle> heap_elements;
-  for (unsigned i = 1; i <= dimension; ++i) {
+  for (unsigned i = 1; i <= m_dimension; ++i) {
     heap_elements.insert(std::make_pair(i, heap.push(node(i))));
   }
 
-  std::vector<std::vector<unsigned> > mst(dimension + 1);
+  std::vector<std::vector<unsigned> > mst(m_dimension + 1);
 
   (*heap_elements[root]).key = 0;
   // Increase is called for the element, instead of decrease,
@@ -79,8 +96,8 @@ mstPrim(
       mst[u.parent].push_back(u.id);
     }
     for (std::map<unsigned, node_handle>::value_type& v : heap_elements) {
-      if (distanceMatrix[v.first][u.id] < (*v.second).key) {
-        (*v.second).key = distanceMatrix[v.first][u.id];
+      if (m_distanceMatrix[v.first][u.id] < (*v.second).key) {
+        (*v.second).key = m_distanceMatrix[v.first][u.id];
         (*v.second).parent = u.id;
         heap.increase(v.second);
       }
@@ -91,6 +108,7 @@ mstPrim(
   return mst;
 }
 
+
 /**
  * @brief Orders tree nodes in the order they will be visited in a preorder walk.
  *
@@ -98,48 +116,21 @@ mstPrim(
  * @param root   Root node of the preorder walk.
  * @param walk   The structure which stores elements in walk order.
  */
-static
-void
-preorderWalk(
+unsigned
+MSTApproximation::preorderWalk(
   const std::vector<std::vector<unsigned> >& tree,
   const unsigned root,
   std::vector<unsigned>& walk
-)
+) const
 {
+  unsigned walkCost = 0;
+  if (walk.size() > 0) {
+    walkCost = m_distanceMatrix[*walk.rbegin()][root];
+  }
   walk.push_back(root);
   const std::vector<unsigned>& children = tree[root];
   for (unsigned child : children) {
-    preorderWalk(tree, child, walk);
+    walkCost += preorderWalk(tree, child, walk);
   }
+  return walkCost;
 }
-
-/**
- * @brief Computes approximate tour cost for the given TSP.
- *
- * @param dimension        Dimension of the TSP instance.
- * @param distanceMatrix   Distance matrix for the TSP instance.
- * @param tour             The tour computed by the algorithm.
- *
- * @return Calculated approximate cost of the tour. 
- */
-unsigned
-tour(
-  const unsigned dimension,
-  const std::vector<std::vector<unsigned> >& distanceMatrix,
-  std::vector<unsigned>& tour
-)
-{
-  const unsigned root = 1;
-  std::vector<std::vector<unsigned> > mst(mstPrim(dimension, root, distanceMatrix));
-  preorderWalk(mst, root, tour);
-
-  unsigned approximateCost = 0;
-  for (unsigned i = 0; i < (dimension - 1); ++i) {
-    approximateCost += distanceMatrix[tour[i]][tour[i+1]];
-  }
-  approximateCost += distanceMatrix[tour[0]][tour[dimension-1]];
-  return approximateCost;
-}
-
-} // namespace approx
-} // namespace tsp

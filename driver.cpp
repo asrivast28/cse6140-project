@@ -1,8 +1,9 @@
-#include "AlgorithmImplementations.hpp"
 #include "ProgramOptions.hpp"
 #include "Timer.hpp"
 #include "TSPInstance.hpp"
 #include "BranchAndBound.hpp"
+#include "MSTApproximation.hpp"
+
 
 #include <fstream>
 #include <iostream>
@@ -40,7 +41,8 @@ main(
   }
   else if (algorithm == "Approx") {
     timer.start();
-    tourCost = tsp::approx::tour(tsp.dimension(), tsp.distanceMatrix(), tour);
+    MSTApproximation approxAlgorithm(tsp.distanceMatrix(), tsp.dimension());
+    tourCost = approxAlgorithm.getTour(tour);
     timer.stop();
   }
   else if (algorithm == "Heur") {
