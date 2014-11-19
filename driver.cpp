@@ -39,7 +39,9 @@ main(
 	  tourCost = bnbAlgorithm.solve(tour);
   }
   else if (algorithm == "Approx") {
+    timer.start();
     tourCost = tsp::approx::tour(tsp.dimension(), tsp.distanceMatrix(), tour);
+    timer.stop();
   }
   else if (algorithm == "Heur") {
   }
@@ -74,6 +76,7 @@ main(
 
   std::cout << "Optimal tour cost is: " << tsp.optimalCost() << std::endl;
   std::cout << "Estimated tour cost is: " << tourCost << std::endl;
+  std::cout << "Time taken for estimation: " << timer.elapsed() << " seconds" << std::endl;
 
   return 0;
 }

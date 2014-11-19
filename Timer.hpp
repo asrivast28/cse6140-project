@@ -10,22 +10,28 @@ namespace bt = boost::timer;
  */
 class Timer {
 public:
-  Timer() : m_timer(), m_cutoff(0) { }
+  Timer() : m_timer(), m_cutoff(0.0) { }
 
   void
-  reset() { m_timer.start(); }
+  start() { m_timer.start(); }
 
   void
-  setCutoff(const double cutoff) { m_cutoff = cutoff * 1e9; }
+  stop() { m_timer.stop(); }
 
   double
-  remaining() const { return (m_cutoff - m_timer.elapsed().wall) * 1e-9; }
+  elapsed() const { return m_timer.elapsed().wall * 1e-9; }
+
+  void
+  setCutoff(const double cutoff) { m_cutoff = cutoff; }
+
+  double
+  remaining() const { return m_cutoff - elapsed(); }
 
   ~Timer() { }
 
 private:
   bt::cpu_timer m_timer;
-  bt::nanosecond_type m_cutoff;
+  double m_cutoff;
 }; // class Timer
 
 #endif // TIMER_HPP_
