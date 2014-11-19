@@ -35,7 +35,7 @@ struct MSTApproximation::compare_node {
 };
 
 MSTApproximation::MSTApproximation(
-  const std::vector<std::vector<unsigned> > distanceMatrix, 
+  std::vector<std::vector<unsigned> >&& distanceMatrix,
   const unsigned dimension
 ) : m_distanceMatrix(distanceMatrix),
   m_dimension(dimension)

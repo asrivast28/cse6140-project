@@ -6,7 +6,7 @@
 class MSTApproximation {
 public:
   MSTApproximation(
-    const std::vector<std::vector<unsigned> >,
+    std::vector<std::vector<unsigned> >&&,
     const unsigned
   );
 
