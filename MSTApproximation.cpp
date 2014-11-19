@@ -115,6 +115,8 @@ MSTApproximation::primMST(
  * @param tree   Tree on which the walk is to be performed.
  * @param root   Root node of the preorder walk.
  * @param walk   The structure which stores elements in walk order.
+ *
+ * @returns Total cost of walking the subtree.
  */
 unsigned
 MSTApproximation::preorderWalk(
