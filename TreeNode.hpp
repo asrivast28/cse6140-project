@@ -11,6 +11,7 @@
 #define TREENODE_HPP_
 
 #include <vector>
+#include <ostream>
 #include "Edge.hpp"
 
 class TreeNode {
@@ -58,6 +59,14 @@ public:
 	getAlive() {
 		return m_alive;
 	}
+
+	std::vector<unsigned>
+	getTour() {
+		return m_travelPath;
+	}
+
+//	friend std::ostream&
+//	operator<<(std::ostream& os, const TreeNode& p);
 
 private:
 	static unsigned MAX_UINT;

@@ -11,6 +11,7 @@
 #include <bitset>
 #include <limits>
 #include <cmath>
+#include <iostream>
 
 std::vector<Edge> TreeNode::s_listEdges;
 
@@ -34,7 +35,7 @@ TreeNode::TreeNode(unsigned size) {
 		std::vector<char> destForOneCity(m_dimension);
 
 		for (unsigned jj = 0; jj < m_dimension; jj++) {
-			destForOneCity.assign(jj, 0);
+			destForOneCity[jj] = 0;
 		}
 
 		m_constraint.push_back(destForOneCity);
@@ -49,6 +50,7 @@ TreeNode::calcLowerBound() {
 
 	for (unsigned ii = 0; ii < m_dimension; ii++) {
 		for (unsigned jj = 0; jj < m_dimension; jj++) {
+			unsigned testCost = s_distances[ii][jj];
 			costOfNode[jj] = s_distances[ii][jj];
 		}
 
@@ -61,6 +63,7 @@ TreeNode::calcLowerBound() {
 			if (m_constraint[ii][jj] == 1) {
 				numIncluded++;
 				included[numIncluded - 1] = costOfNode[jj];
+				unsigned testCost = included[numIncluded - 1];
 				costOfNode[jj] = MAX_UINT;
 			}
 		}
@@ -88,7 +91,9 @@ TreeNode::calcLowerBound() {
 		lowerBound += (smallest + secondSmallest);
 	}
 
-	m_lowerBound = lowerBound;
+	m_lowerBound = lowerBound/2;
+
+	std::cout << "Lower bound: " << m_lowerBound << std::endl;
 }
 
 bool
@@ -176,7 +181,7 @@ TreeNode::addEdge(unsigned idxEdge) {
 		int x = std::abs(curEdge.getAnyNode());
 		int y = std::abs(curEdge.getTheOther());
 
-		if (m_constraint[x][y] == 0) {
+		if (m_constraint[x - 1][y - 1] == 0) {
 			break;
 		}
 
@@ -185,9 +190,9 @@ TreeNode::addEdge(unsigned idxEdge) {
 
 	if (idxEdge < s_listEdges.size()) {
 		if (curEdge.getAnyNode() < 0) {
-			setIndConstraint(std::abs(curEdge.getAnyNode()), std::abs(curEdge.getTheOther()), -1);
+			setIndConstraint(std::abs(curEdge.getAnyNode()) - 1, std::abs(curEdge.getTheOther()) - 1, -1);
 		} else {
-			setIndConstraint(std::abs(curEdge.getAnyNode()), std::abs(curEdge.getTheOther()), 1);
+			setIndConstraint(std::abs(curEdge.getAnyNode()) - 1, std::abs(curEdge.getTheOther()) - 1, 1);
 		}
 
 	}
@@ -221,7 +226,8 @@ TreeNode::expand() {
 	// Check per mature cycle
 	for (unsigned ii = 0; ii < m_dimension; ii++) {
 		for (unsigned jj = 0; jj < m_dimension; jj++) {
-			if (ii != jj && checkCycle(ii, jj) < m_dimension
+			unsigned cycleDimension = checkCycle(ii, jj);
+			if (ii != jj && cycleDimension != 0 && cycleDimension < m_dimension
 					&& m_constraint[ii][jj] == 0) {
 				m_constraint[ii][jj] = -1;
 				m_constraint[jj][ii] = -1;
@@ -254,15 +260,15 @@ TreeNode::expand() {
 
 void
 TreeNode::setIndConstraint(unsigned city1, unsigned city2, char val) {
-	std::vector<char> oneCity1 = m_constraint.at(city1);
-	oneCity1.assign(city2, val);
+//	std::vector<char> oneCity1 = m_constraint.at(city1);
+//	oneCity1.assign(city2, val);
 
-	m_constraint.assign(city1, oneCity1);
+	m_constraint[city1][city2] = val;
 
-	std::vector<char> oneCity2 = m_constraint.at(city2);
-	oneCity2.assign(city1, val);
+//	std::vector<char> oneCity2 = m_constraint.at(city2);
+//	oneCity2.assign(city1, val);
 
-	m_constraint.assign(city2, oneCity2);
+	m_constraint[city2][city1] = val;
 }
 
 unsigned
@@ -331,3 +337,11 @@ TreeNode::findSmallestTwo(const std::vector<unsigned>& costOfNode, unsigned& sma
 		}
 	}
 }
+
+//ostream& operator<<(ostream& os, const TreeNode& p) {
+//
+//	os << "{ ";
+//	for (const Edge& e : p.include_) { os << "(" << e.u << " " << e.v << ") "; }
+//	os << " } ";
+//	return os;
+//}

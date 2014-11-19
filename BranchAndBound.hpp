@@ -16,10 +16,10 @@
 class BranchAndBound {
 
 public:
-	BranchAndBound(const TSPInstance& data);
+	BranchAndBound(const unsigned dimension, const std::vector<std::vector<unsigned>>& distanceMatrix);
 
 	unsigned
-	solve();
+	solve(std::vector<unsigned>& tour);
 
 private:
 	unsigned m_dimension;

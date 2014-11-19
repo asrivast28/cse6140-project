@@ -2,6 +2,7 @@
 #include "ProgramOptions.hpp"
 #include "Timer.hpp"
 #include "TSPInstance.hpp"
+#include "BranchAndBound.hpp"
 
 #include <fstream>
 #include <iostream>
@@ -34,6 +35,8 @@ main(
   bool deterministic = true;
 
   if (algorithm == "BnB") {
+	  BranchAndBound bnbAlgorithm(tsp.dimension(), tsp.distanceMatrix());
+	  tourCost = bnbAlgorithm.solve(tour);
   }
   else if (algorithm == "Approx") {
     tourCost = tsp::approx::tour(tsp.dimension(), tsp.distanceMatrix(), tour);
