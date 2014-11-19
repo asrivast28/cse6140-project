@@ -1,6 +1,9 @@
 import os
+import platform
 
 topDir = os.getcwd()
+
+cxx = 'g++'
 
 cppPaths = [
             topDir,
@@ -15,6 +18,7 @@ cxxLibs = [
            'boost_filesystem',
            'boost_program_options',
            'boost_timer',
+           'boost_chrono',
            'boost_system',
            ]
 
@@ -30,11 +34,25 @@ srcFiles = [
 cppDefs = [
            ]
 
+libPaths = [
+            ]
+
 debug = ARGUMENTS.get('DEBUG', 0)
 
 targetName = 'tspsolver'
 
 buildDir = 'build'
+
+otherTools = [
+              ]
+
+
+if platform.system() == 'Windows':
+    cxx = 'C:\\MinGW\\bin\\g++.exe'
+    cppPaths.append("C:\\Boost\\include\\boost-1_57")
+    libPaths.append("C:\\Boost\\lib")
+    cxxLibs = [lib + '-mgw48-mt-1_57' for lib in cxxLibs]
+    otherTools.append('mingw')
 
 if debug in [0, '0']:
     cxxFlags.append('-O3')
@@ -45,7 +63,7 @@ else:
     buildDir = 'debug'
     targetName += '_debug'
 
-env = Environment(CXX = 'g++', CXXFLAGS = cxxFlags, CPPPATH = cppPaths, CPPDEFINES = cppDefs)
+env = Environment(CXX = cxx, CXXFLAGS = cxxFlags, CPPPATH = cppPaths, CPPDEFINES = cppDefs, LIBPATH = libPaths, tools = otherTools)
 
 buildDir = os.path.join('builds', buildDir)
 env.VariantDir(buildDir, '.', duplicate = 0)
