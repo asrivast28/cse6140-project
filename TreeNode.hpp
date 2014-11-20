@@ -101,7 +101,7 @@ private:
 	checkCycle(unsigned city1, unsigned city2);
 
 	void
-	findSmallestTwo(const std::vector<unsigned>& costOfNode, unsigned& smallest, unsigned& secondSmallest);
+	findSmallestTwo(unsigned* costOfNode, unsigned& smallest, unsigned& secondSmallest);
 
 };
 

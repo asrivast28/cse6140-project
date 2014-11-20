@@ -46,7 +46,7 @@ void
 TreeNode::calcLowerBound() {
 	unsigned lowerBound = 0;
 
-	std::vector<unsigned> costOfNode(m_dimension);
+	unsigned costOfNode[m_dimension];
 
 	for (unsigned ii = 0; ii < m_dimension; ii++) {
 		for (unsigned jj = 0; jj < m_dimension; jj++) {
@@ -93,7 +93,7 @@ TreeNode::calcLowerBound() {
 
 	m_lowerBound = lowerBound/2;
 
-	std::cout << "Lower bound: " << m_lowerBound << std::endl;
+//	std::cout << "Lower bound: " << m_lowerBound << std::endl;
 }
 
 bool
@@ -319,7 +319,7 @@ TreeNode::checkCycle(unsigned city1, unsigned city2) {
 }
 
 void
-TreeNode::findSmallestTwo(const std::vector<unsigned>& costOfNode, unsigned& smallest, unsigned& secondSmallest) {
+TreeNode::findSmallestTwo(unsigned* costOfNode, unsigned& smallest, unsigned& secondSmallest) {
 	if (costOfNode[0] <= costOfNode[1]) {
 		smallest = costOfNode[0];
 		secondSmallest = costOfNode[1];

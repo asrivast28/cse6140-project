@@ -22,6 +22,7 @@ BranchAndBound::BranchAndBound(const unsigned dimension, const std::vector<std::
 
 //	std::vector<std::vector<unsigned>> distances = tsp.distanceMatrix();
 
+
 	// Initialize the edge list
 //	TreeNode::s_listEdges = new std::vector<Edge>(m_dimension);
 	for (unsigned ii = 1; ii <= m_dimension; ii++) {
@@ -29,18 +30,23 @@ BranchAndBound::BranchAndBound(const unsigned dimension, const std::vector<std::
 		std::vector<unsigned> oneRow(m_dimension);
 
 		for (unsigned jj = ii + 1; jj < m_dimension; jj++) {
-			unsigned distance = distanceMatrix[ii - 1][jj - 1];
+			unsigned distance = distanceMatrix[ii][jj];
 
-			std::cout << "distance: " << distance << std::endl;
+//			std::cout << "distance: " << distance << std::endl;
 
 			Edge newEdge(ii, jj, distance);
 			TreeNode::s_listEdges.push_back(newEdge);
 
 			Edge inverseEdge(-ii, -jj, distance);
 			TreeNode::s_listEdges.push_back(inverseEdge);
+		}
+
+		for (unsigned jj = 1; jj <= m_dimension; jj++) {
+
+			unsigned distance = distanceMatrix[ii][jj];
 
 			// Distances
-			oneRow.push_back(distance);
+			oneRow[jj - 1] = distance;
 		}
 
 
@@ -77,7 +83,7 @@ BranchAndBound::solve(std::vector<unsigned>& tour) {
 void
 BranchAndBound::branchAndBound(TreeNode* node, unsigned idxEdge) {
 
-	std::cout << "branchAndBound-" << idxEdge << std::endl;
+//	std::cout << "branchAndBound-" << idxEdge << std::endl;
 
 	if (idxEdge != std::numeric_limits<unsigned>::max()
 			&& idxEdge >= TreeNode::s_listEdges.size()) {
@@ -87,6 +93,15 @@ BranchAndBound::branchAndBound(TreeNode* node, unsigned idxEdge) {
 	// Update upper bound
 	if (node->isSolution()) {
 		node->recordSolution();
+
+		// Print current a solution
+		std::cout << "current solution: " << node->getCost() << std::endl;
+		std::vector<unsigned> currentTour = node->getTour();
+		std::cout << "tour: ";
+		for (int ii = 0; ii < currentTour.size(); ii++) {
+			std::cout << currentTour[ii] << ", ";
+		}
+		std::cout << std::endl;
 
 		if (node->getCost() < m_bestCost) {
 			m_bestCost = node->getCost();
