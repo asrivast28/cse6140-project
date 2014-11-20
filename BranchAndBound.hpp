@@ -13,10 +13,16 @@
 #include "TSPInstance.hpp"
 #include "TreeNode.hpp"
 
+class Timer;
+
 class BranchAndBound {
 
 public:
-	BranchAndBound(const unsigned dimension, const std::vector<std::vector<unsigned>>& distanceMatrix);
+	BranchAndBound(const unsigned dimension,
+			const std::vector<std::vector<unsigned>>& distanceMatrix,
+			const unsigned cutoffTime,
+			std::ofstream* trcFile,
+			const Timer* timer);
 
 	unsigned
 	solve(std::vector<unsigned>& tour);
@@ -24,12 +30,17 @@ public:
 private:
 	unsigned m_dimension;
 
-	unsigned m_bestCost;
+	double m_bestCost;
 	TreeNode* m_bestNode;
 
 	unsigned m_numGeneratedNodes;
 	unsigned m_numPrunedNodes;
 
+	unsigned m_cutoffTime;
+
+	std::ofstream* m_trcFile;
+
+	const Timer* m_timer;
 
 
 	void

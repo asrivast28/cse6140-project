@@ -34,32 +34,11 @@ main(
   std::vector<unsigned> tour;
   unsigned tourCost = 0;
   bool deterministic = true;
-
-  if (algorithm == "BnB") {
-	  BranchAndBound bnbAlgorithm(tsp.dimension(), tsp.distanceMatrix());
-	  tourCost = bnbAlgorithm.solve(tour);
-  }
-  else if (algorithm == "Approx") {
-    timer.start();
-    MSTApproximation approxAlgorithm(tsp.distanceMatrix(), tsp.dimension());
-    tourCost = approxAlgorithm.getTour(tour);
-    timer.stop();
-  }
-  else if (algorithm == "Heur") {
-  }
-  else if (algorithm == "LS1") {
-    deterministic = false;
-  }
-  else if (algorithm == "LS2") {
-    deterministic = false;
-  }
-  else {
-    std::cerr << "Unknown algorithm type '" << algorithm << "'." << std::endl;
-    return 1;
+  if (algorithm == "LS1" || algorithm == "LS2") {
+	  deterministic = false;
   }
 
-  assert(tour.size() == tsp.dimension());
-
+  // Make a solution file
   std::stringstream solnFileName;
   solnFileName << boost::filesystem::path(options.instanceFile()).stem().string();
   solnFileName << "_" << algorithm << "_" << options.cutoffTime();
@@ -70,6 +49,49 @@ main(
 
   std::ofstream solnFile(solnFileName.str());
 
+  // Make a trace file for BnB and LS
+  std::stringstream trcFileName;
+  if (algorithm != "Approx" && algorithm != "Heur") {
+	  trcFileName << boost::filesystem::path(options.instanceFile()).stem().string();
+	  trcFileName << "_" << algorithm << "_" << options.cutoffTime();
+	  if (!deterministic) {
+		  trcFileName << "_" << options.randomSeed();
+	  }
+	  trcFileName << ".trace";
+  }
+
+  if (algorithm == "BnB") {
+	  std::ofstream trcFile(trcFileName.str());
+
+	  timer.start();
+	  BranchAndBound bnbAlgorithm(tsp.dimension(),
+			  tsp.distanceMatrix(),
+			  options.cutoffTime(),
+			  &trcFile,
+			  &timer);
+	  tourCost = bnbAlgorithm.solve(tour);
+	  timer.stop();
+  }
+  else if (algorithm == "Approx") {
+    timer.start();
+    MSTApproximation approxAlgorithm(tsp.distanceMatrix(), tsp.dimension());
+    tourCost = approxAlgorithm.getTour(tour);
+    timer.stop();
+  }
+  else if (algorithm == "Heur") {
+  }
+  else if (algorithm == "LS1") {
+  }
+  else if (algorithm == "LS2") {
+  }
+  else {
+    std::cerr << "Unknown algorithm type '" << algorithm << "'." << std::endl;
+    return 1;
+  }
+
+  assert(tour.size() == tsp.dimension());
+
+  // Write the final solution
   solnFile << tourCost << std::endl;
   for (unsigned i = 0; i < (tsp.dimension() - 1); ++i) {
     solnFile << tour[i] << ",";

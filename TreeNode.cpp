@@ -1,5 +1,6 @@
 /*
  * TreeNode.cpp
+
  *
  *  Created on: Nov 16, 2014
  *  Author: Parul Awasthy (<pawasthy@gatech.edu>)
@@ -12,6 +13,7 @@
 #include <limits>
 #include <cmath>
 #include <iostream>
+#include <sstream>
 
 std::vector<Edge> TreeNode::s_listEdges;
 
@@ -44,14 +46,20 @@ TreeNode::TreeNode(unsigned size) {
 
 void
 TreeNode::calcLowerBound() {
-	unsigned lowerBound = 0;
+	double lowerBound = 0.0;
 
 	unsigned costOfNode[m_dimension];
 
 	for (unsigned ii = 0; ii < m_dimension; ii++) {
 		for (unsigned jj = 0; jj < m_dimension; jj++) {
-			unsigned testCost = s_distances[ii][jj];
-			costOfNode[jj] = s_distances[ii][jj];
+
+			// Remove excluded edges
+			if (m_constraint[ii][jj] == -1) {
+				costOfNode[jj] = MAX_UINT;
+			} else {
+				costOfNode[jj] = s_distances[ii][jj];
+			}
+
 		}
 
 		costOfNode[ii] = MAX_UINT;
@@ -59,11 +67,11 @@ TreeNode::calcLowerBound() {
 		std::vector<unsigned> included(m_dimension);
 		int numIncluded = 0;
 
+		// Include confirmed edges
 		for (unsigned jj = 0; jj < m_dimension; jj++) {
 			if (m_constraint[ii][jj] == 1) {
 				numIncluded++;
 				included[numIncluded - 1] = costOfNode[jj];
-				unsigned testCost = included[numIncluded - 1];
 				costOfNode[jj] = MAX_UINT;
 			}
 		}
@@ -71,7 +79,9 @@ TreeNode::calcLowerBound() {
 		unsigned smallest = 0;
 		unsigned secondSmallest = 0;
 
-		findSmallestTwo(costOfNode, smallest, secondSmallest);
+		if (numIncluded != 2) {
+			findSmallestTwo(costOfNode, smallest, secondSmallest);
+		}
 
 		if (numIncluded == 1) {
 			secondSmallest = smallest;
@@ -92,8 +102,6 @@ TreeNode::calcLowerBound() {
 	}
 
 	m_lowerBound = lowerBound/2;
-
-//	std::cout << "Lower bound: " << m_lowerBound << std::endl;
 }
 
 bool
@@ -129,8 +137,8 @@ TreeNode::recordSolution() {
 	}
 
 	m_totalCost = s_distances[u][v];
-	m_travelPath.push_back(u);
-	m_travelPath.push_back(v);
+	m_travelPath.push_back(u + 1);
+	m_travelPath.push_back(v + 1);
 
 	unsigned start = 0;
 	unsigned curPos = v;
@@ -141,21 +149,24 @@ TreeNode::recordSolution() {
 			if (jj != start && m_constraint[curPos][jj] == 1) {
 				start = curPos;
 				curPos = jj;
-				m_totalCost = s_distances[start][curPos];
-				m_travelPath.push_back(curPos);
+				m_totalCost += s_distances[start][curPos];
+				m_travelPath.push_back(curPos + 1);
 				break;
 			}
 		}
 
 	}
+
+	// Remove the first node
+	m_travelPath.pop_back();
 }
 
-unsigned
+double
 TreeNode::getCost() {
 	return m_totalCost;
 }
 
-unsigned
+double
 TreeNode::getLowerBound() {
 	return m_lowerBound;
 }
@@ -223,7 +234,7 @@ TreeNode::expand() {
 		}
 	}
 
-	// Check per mature cycle
+	// Check premature cycle
 	for (unsigned ii = 0; ii < m_dimension; ii++) {
 		for (unsigned jj = 0; jj < m_dimension; jj++) {
 			unsigned cycleDimension = checkCycle(ii, jj);
@@ -253,21 +264,11 @@ TreeNode::expand() {
 			}
 		}
 	}
-
-	// Again
-
 }
 
 void
 TreeNode::setIndConstraint(unsigned city1, unsigned city2, char val) {
-//	std::vector<char> oneCity1 = m_constraint.at(city1);
-//	oneCity1.assign(city2, val);
-
 	m_constraint[city1][city2] = val;
-
-//	std::vector<char> oneCity2 = m_constraint.at(city2);
-//	oneCity2.assign(city1, val);
-
 	m_constraint[city2][city1] = val;
 }
 
@@ -285,7 +286,7 @@ TreeNode::checkCycle(unsigned city1, unsigned city2) {
 
 	unsigned passedEdges = 1;
 
-	bool stop = true;
+	bool stop = false;
 
 	while (curPos != city1 && passedEdges <= m_dimension && !stop) {
 		stop = true;
@@ -303,7 +304,7 @@ TreeNode::checkCycle(unsigned city1, unsigned city2) {
 	}
 
 	// Not a cycle
-	if ((curPos != m_dimension) && (passedEdges < m_dimension))
+	if ((curPos != city1) && (passedEdges < m_dimension))
 	{
 		cntCities = 0;
 	} else {
@@ -337,11 +338,3 @@ TreeNode::findSmallestTwo(unsigned* costOfNode, unsigned& smallest, unsigned& se
 		}
 	}
 }
-
-//ostream& operator<<(ostream& os, const TreeNode& p) {
-//
-//	os << "{ ";
-//	for (const Edge& e : p.include_) { os << "(" << e.u << " " << e.v << ") "; }
-//	os << " } ";
-//	return os;
-//}
