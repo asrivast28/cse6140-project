@@ -100,6 +100,7 @@ main(
 
   std::cout << "Optimal tour cost is: " << tsp.optimalCost() << std::endl;
   std::cout << "Estimated tour cost is: " << tourCost << std::endl;
+  std::cout << "Relative error: " << (tourCost - tsp.optimalCost()) * 1.0 / tsp.optimalCost() << std::endl;
   std::cout << "Time taken for estimation: " << timer.elapsed() << " seconds" << std::endl;
 
   return 0;
