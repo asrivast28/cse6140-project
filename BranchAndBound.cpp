@@ -23,6 +23,11 @@ BranchAndBound::BranchAndBound(const unsigned dimension,
 		  m_trcFile(trcFile),
 		  m_timer(timer) {
 
+	// In case of no cutoff time, set default value as 300 seconds
+	if (m_cutoffTime == 0) {
+		m_cutoffTime = 300;
+	}
+
 	this->m_bestCost = std::numeric_limits<unsigned>::max();
 	this->m_numGeneratedNodes = 0;
 	this->m_numPrunedNodes = 0;
