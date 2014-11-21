@@ -28,6 +28,7 @@ srcFiles = [
             'MSTApproximation.cpp',
             'TreeNode.cpp',
             'BranchAndBound.cpp',
+            'GreedyHeuristic.cpp',
             'driver.cpp',
             ]
 

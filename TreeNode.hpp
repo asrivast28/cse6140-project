@@ -13,6 +13,7 @@
 #include <vector>
 #include <ostream>
 #include "Edge.hpp"
+#include <vector>
 
 class TreeNode {
 public:

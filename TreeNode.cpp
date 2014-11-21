@@ -12,6 +12,7 @@
 #include <limits>
 #include <cmath>
 #include <iostream>
+#include <vector>
 
 std::vector<Edge> TreeNode::s_listEdges;
 

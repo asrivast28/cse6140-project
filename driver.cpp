@@ -3,6 +3,7 @@
 #include "TSPInstance.hpp"
 #include "BranchAndBound.hpp"
 #include "MSTApproximation.hpp"
+#include "GreedyHeuristic.hpp"
 
 
 #include <fstream>
@@ -29,6 +30,7 @@ main(
 
   TSPInstance tsp(options.instanceFile());
 
+
   std::string algorithm = options.algorithm();
 
   std::vector<unsigned> tour;
@@ -46,6 +48,8 @@ main(
     timer.stop();
   }
   else if (algorithm == "Heur") {
+	  GreedyHeuristic greedyAlgorithm(tsp.dimension(), tsp.distanceMatrix());
+	  tourCost = greedyAlgorithm.getTour(tour);
   }
   else if (algorithm == "LS1") {
     deterministic = false;
