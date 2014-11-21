@@ -44,8 +44,7 @@ targetName = 'tspsolver'
 
 buildDir = 'build'
 
-otherTools = [
-              ]
+otherTools = None
 
 
 if platform.system() == 'Windows':
@@ -53,7 +52,7 @@ if platform.system() == 'Windows':
     cppPaths.append("C:\\Boost\\include\\boost-1_57")
     libPaths.append("C:\\Boost\\lib")
     cxxLibs = [lib + '-mgw48-mt-1_57' for lib in cxxLibs]
-    otherTools.append('mingw')
+    otherTools = ['mingw']
 
 if debug in [0, '0']:
     cxxFlags.append('-O3')

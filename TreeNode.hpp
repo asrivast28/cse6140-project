@@ -33,10 +33,10 @@ public:
 	void
 	recordSolution();
 
-	unsigned
+	double
 	getCost();
 
-	unsigned
+	double
 	getLowerBound();
 
 	void
@@ -66,9 +66,6 @@ public:
 		return m_travelPath;
 	}
 
-//	friend std::ostream&
-//	operator<<(std::ostream& os, const TreeNode& p);
-
 private:
 	static unsigned MAX_UINT;
 
@@ -82,10 +79,10 @@ private:
 	std::vector<unsigned>
 	m_tripSoFar;
 
-	unsigned
+	double
 	m_totalCost;
 
-	unsigned
+	double
 	m_lowerBound;
 
 	std::vector<unsigned>
@@ -102,7 +99,7 @@ private:
 	checkCycle(unsigned city1, unsigned city2);
 
 	void
-	findSmallestTwo(const std::vector<unsigned>& costOfNode, unsigned& smallest, unsigned& secondSmallest);
+	findSmallestTwo(unsigned* costOfNode, unsigned& smallest, unsigned& secondSmallest);
 
 };
 

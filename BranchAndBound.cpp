@@ -8,48 +8,55 @@
  */
 
 #include <limits>
-#include "BranchAndBound.hpp"
 #include <iostream>
+#include "BranchAndBound.hpp"
+#include "Timer.hpp"
 
 
-BranchAndBound::BranchAndBound(const unsigned dimension, const std::vector<std::vector<unsigned>>& distanceMatrix) {
-	// Initialize member variables
-	this->m_dimension = dimension;
+BranchAndBound::BranchAndBound(const unsigned dimension,
+		const std::vector<std::vector<unsigned>>& distanceMatrix,
+		const unsigned cutoffTime,
+		std::ofstream* trcFile,
+		const Timer* timer)
+		: m_dimension(dimension),
+		  m_cutoffTime(cutoffTime),
+		  m_trcFile(trcFile),
+		  m_timer(timer) {
+
+	// In case of no cutoff time, set default value as 300 seconds
+	if (m_cutoffTime == 0) {
+		m_cutoffTime = 300;
+	}
+
 	this->m_bestCost = std::numeric_limits<unsigned>::max();
 	this->m_numGeneratedNodes = 0;
 	this->m_numPrunedNodes = 0;
 	this->m_bestNode = nullptr;
 
-//	std::vector<std::vector<unsigned>> distances = tsp.distanceMatrix();
-
 	// Initialize the edge list
-//	TreeNode::s_listEdges = new std::vector<Edge>(m_dimension);
 	for (unsigned ii = 1; ii <= m_dimension; ii++) {
 
 		std::vector<unsigned> oneRow(m_dimension);
 
 		for (unsigned jj = ii + 1; jj < m_dimension; jj++) {
-			unsigned distance = distanceMatrix[ii - 1][jj - 1];
-
-			std::cout << "distance: " << distance << std::endl;
+			unsigned distance = distanceMatrix[ii][jj];
 
 			Edge newEdge(ii, jj, distance);
 			TreeNode::s_listEdges.push_back(newEdge);
 
 			Edge inverseEdge(-ii, -jj, distance);
 			TreeNode::s_listEdges.push_back(inverseEdge);
-
-			// Distances
-			oneRow.push_back(distance);
 		}
 
+		for (unsigned jj = 1; jj <= m_dimension; jj++) {
+			unsigned distance = distanceMatrix[ii][jj];
+
+			// Distances
+			oneRow[jj - 1] = distance;
+		}
 
 		TreeNode::s_distances.push_back(oneRow);
 	}
-
-//	std::cout << "vector edge: " << TreeNode::s_listEdges << std::endl;
-//	std::cout << "vector distance: " << TreeNode::s_distances << std::endl;
-
 }
 
 unsigned
@@ -68,7 +75,13 @@ BranchAndBound::solve(std::vector<unsigned>& tour) {
 		delete root;
 	}
 
-	tour = m_bestNode->getTour();
+	if (m_bestNode != nullptr) {
+		tour = m_bestNode->getTour();
+		delete m_bestNode;
+	}
+
+	std::cout << "Total generated node: " << m_numGeneratedNodes << std::endl;
+	std::cout << "Total pruned node: " << m_numPrunedNodes << std::endl;
 
 	return m_bestCost;
 }
@@ -77,7 +90,10 @@ BranchAndBound::solve(std::vector<unsigned>& tour) {
 void
 BranchAndBound::branchAndBound(TreeNode* node, unsigned idxEdge) {
 
-	std::cout << "branchAndBound-" << idxEdge << std::endl;
+	// Check cutoff time
+	if (m_timer->elapsed() > m_cutoffTime) {
+		return;
+	}
 
 	if (idxEdge != std::numeric_limits<unsigned>::max()
 			&& idxEdge >= TreeNode::s_listEdges.size()) {
@@ -88,6 +104,10 @@ BranchAndBound::branchAndBound(TreeNode* node, unsigned idxEdge) {
 	if (node->isSolution()) {
 		node->recordSolution();
 
+
+		// Save to the trace file
+		(*m_trcFile) << m_timer->elapsed() << ", " << node->getCost() << std::endl;
+
 		if (node->getCost() < m_bestCost) {
 			m_bestCost = node->getCost();
 
@@ -96,119 +116,119 @@ BranchAndBound::branchAndBound(TreeNode* node, unsigned idxEdge) {
 			}
 			m_bestNode = node;
 			m_bestNode->setAlive(true);
-
-			return;
 		}
-	}
+	} else {
 
-	// Branch..
-	if (node->getLowerBound() < m_bestCost) {
+		// Branch..
+		if (node->getLowerBound() < m_bestCost) {
 
-		// Left child node
-		TreeNode* leftChild = new TreeNode(m_dimension);
-		m_numGeneratedNodes++;
+			// Left child node
+			TreeNode* leftChild = new TreeNode(m_dimension);
+			m_numGeneratedNodes++;
 
-		leftChild->setConstraint(node->getConstraint());
+			leftChild->setConstraint(node->getConstraint());
 
-		if (idxEdge != std::numeric_limits<unsigned>::max() && idxEdge % 2 == 0) {
-			idxEdge += 2;
-		} else {
-			idxEdge++;
-		}
-
-		if (idxEdge >= TreeNode::s_listEdges.size()) {
-			delete leftChild;
-			return;
-		}
-
-		unsigned idxLeftEdge = leftChild->addEdge(idxEdge);
-		leftChild->expand();
-		leftChild->calcLowerBound();
-
-		if (leftChild->getLowerBound() >= m_bestCost) {
-			delete leftChild;
-
-			leftChild = nullptr;
-			m_numPrunedNodes++;
-		}
-
-		// Right child node
-		TreeNode* rightChild = new TreeNode(m_dimension);
-		m_numGeneratedNodes++;
-		rightChild->setConstraint(node->getConstraint());
-		if (idxLeftEdge >= TreeNode::s_listEdges.size()) {
-			if (leftChild != nullptr) {
-				delete leftChild;
-			}
-
-			if (rightChild != nullptr) {
-				delete rightChild;
-			}
-
-			return;
-		}
-
-		int idxRightEdge = rightChild->addEdge(idxLeftEdge + 1);
-		rightChild->expand();
-		rightChild->calcLowerBound();
-
-		if (rightChild->getLowerBound() > m_bestCost) {
-			delete rightChild;
-
-			rightChild = nullptr;
-			m_numPrunedNodes++;
-		}
-
-		// Expand tree
-		if (leftChild != nullptr && rightChild == nullptr) {
-			branchAndBound(leftChild, idxLeftEdge);
-		} else if (rightChild != nullptr && leftChild == nullptr) {
-			branchAndBound(rightChild, idxRightEdge);
-		} else if (leftChild != nullptr && rightChild != nullptr
-				&& leftChild->getLowerBound() <= rightChild->getLowerBound()) {
-			if (leftChild->getLowerBound() < m_bestCost) {
-				branchAndBound(leftChild, idxLeftEdge);
+			if (idxEdge != std::numeric_limits<unsigned>::max() && idxEdge % 2 == 0) {
+				idxEdge += 2;
 			} else {
+				idxEdge++;
+			}
+
+			if (idxEdge >= TreeNode::s_listEdges.size()) {
 				delete leftChild;
+				return;
+			}
+
+			unsigned idxLeftEdge = leftChild->addEdge(idxEdge);
+			leftChild->expand();
+			leftChild->calcLowerBound();
+
+			if (leftChild->getLowerBound() >= m_bestCost) {
+				delete leftChild;
+
 				leftChild = nullptr;
 				m_numPrunedNodes++;
 			}
 
-			if (rightChild->getLowerBound() < m_bestCost) {
-				branchAndBound(rightChild, idxRightEdge);
+			// Right child node
+			TreeNode* rightChild = new TreeNode(m_dimension);
+			m_numGeneratedNodes++;
+			rightChild->setConstraint(node->getConstraint());
+			if (idxLeftEdge >= TreeNode::s_listEdges.size()) {
+				if (leftChild != nullptr) {
+					delete leftChild;
+				}
+
+				if (rightChild != nullptr) {
+					delete rightChild;
+				}
+
+				return;
 			}
-			else {
+
+			int idxRightEdge = rightChild->addEdge(idxLeftEdge + 1);
+			rightChild->expand();
+			rightChild->calcLowerBound();
+
+			if (rightChild->getLowerBound() > m_bestCost) {
 				delete rightChild;
-				rightChild = nullptr;
-				m_numPrunedNodes++;
-			}
-		} else if (rightChild != nullptr) {
-			if (rightChild->getLowerBound() < m_bestCost) {
-				branchAndBound(rightChild, idxRightEdge);
-			}
-			else {
-				delete rightChild;
+
 				rightChild = nullptr;
 				m_numPrunedNodes++;
 			}
 
-			if (leftChild->getLowerBound() < m_bestCost) {
+			// Expand tree
+			if (leftChild != nullptr && rightChild == nullptr) {
 				branchAndBound(leftChild, idxLeftEdge);
-			} else {
+			} else if (rightChild != nullptr && leftChild == nullptr) {
+				branchAndBound(rightChild, idxRightEdge);
+			} else if (leftChild != nullptr && rightChild != nullptr
+					&& leftChild->getLowerBound() <= rightChild->getLowerBound()) {
+				if (leftChild->getLowerBound() < m_bestCost) {
+					branchAndBound(leftChild, idxLeftEdge);
+				} else {
+					delete leftChild;
+					leftChild = nullptr;
+					m_numPrunedNodes++;
+				}
+
+				if (rightChild->getLowerBound() < m_bestCost) {
+					branchAndBound(rightChild, idxRightEdge);
+				}
+				else {
+					delete rightChild;
+					rightChild = nullptr;
+					m_numPrunedNodes++;
+				}
+			} else if (rightChild != nullptr) {
+				if (rightChild->getLowerBound() < m_bestCost) {
+					branchAndBound(rightChild, idxRightEdge);
+				}
+				else {
+					delete rightChild;
+					rightChild = nullptr;
+					m_numPrunedNodes++;
+				}
+
+				if (leftChild->getLowerBound() < m_bestCost) {
+					branchAndBound(leftChild, idxLeftEdge);
+				} else {
+					delete leftChild;
+					leftChild = nullptr;
+					m_numPrunedNodes++;
+				}
+			}
+
+
+			if (leftChild != nullptr && !leftChild->getAlive()) {
 				delete leftChild;
-				leftChild = nullptr;
-				m_numPrunedNodes++;
+			}
+
+			if (rightChild != nullptr && !rightChild->getAlive()) {
+				delete rightChild;
 			}
 		}
 
-
-		if (leftChild != nullptr && !leftChild->getAlive()) {
-			delete leftChild;
-		}
-
-		if (rightChild != nullptr && !rightChild->getAlive()) {
-			delete rightChild;
-		}
 	}
 
 }
