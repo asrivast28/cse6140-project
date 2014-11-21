@@ -81,8 +81,10 @@ main(
     timer.stop();
   }
   else if (algorithm == "Heur") {
-	  GreedyHeuristic greedyAlgorithm(tsp.dimension(), tsp.distanceMatrix());
-	  tourCost = greedyAlgorithm.getTour(tour);
+    timer.start();
+    GreedyHeuristic greedyAlgorithm(tsp.dimension(), tsp.distanceMatrix());
+    tourCost = greedyAlgorithm.getTour(tour);
+    timer.stop();
   }
   else if (algorithm == "LS1") {
   }

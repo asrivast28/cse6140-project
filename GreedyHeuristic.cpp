@@ -95,7 +95,7 @@ unsigned GreedyHeuristic::getTour(
     approximateCost += m_distanceMatrix[tour[i]][tour[i+1]];
   }
   approximateCost += m_distanceMatrix[tour[0]][tour[m_dimension-1]];
-  displayVector(tour);
+  // displayVector(tour);
   return approximateCost;
 }
 
