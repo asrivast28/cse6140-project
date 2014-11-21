@@ -76,9 +76,6 @@ private:
 	std::vector<std::vector<char>>
 	m_constraint;
 
-	std::vector<unsigned>
-	m_tripSoFar;
-
 	double
 	m_totalCost;
 
