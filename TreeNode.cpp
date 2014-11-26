@@ -109,7 +109,7 @@ TreeNode::calcLowerBound() {
 bool
 TreeNode::isSolution() {
 	// Find starting edge from node 1
-	unsigned u = 0, v = 0;
+	unsigned u = 0, v = MAX_UINT;
 	for (unsigned jj = 1; jj < m_dimension; jj++) {
 		if (m_constraint[0][jj] == 1) {
 			v = jj;
@@ -117,7 +117,7 @@ TreeNode::isSolution() {
 		}
 	}
 
-	if (v >= 0) {
+	if (v < MAX_UINT) {
 		return checkCycle(u, v) == m_dimension;
 	} else {
 		return false;

@@ -14,7 +14,7 @@ TSPInstance::TSPInstance(
   bool headerSection = true;
   do {
     std::string lineStr;
-    headerSection = std::getline(instanceFile, lineStr);
+    headerSection = (bool)std::getline(instanceFile, lineStr);
     if (lineStr == "NODE_COORD_SECTION") {
       headerSection = false;
     }
