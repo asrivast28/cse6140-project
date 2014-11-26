@@ -29,6 +29,7 @@ srcFiles = [
             'TreeNode.cpp',
             'BranchAndBound.cpp',
             'GreedyHeuristic.cpp',
+            'GeneticAlgorithm.cpp',
             'driver.cpp',
             ]
 
