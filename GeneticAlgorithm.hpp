@@ -41,6 +41,12 @@ private:
 
 	std::minstd_rand m_rand;
 
+	unsigned m_sizePopulation;
+
+	unsigned m_numGeneration;
+
+	double m_rateMutate;
+
 	void
 	initialPopulate(const unsigned sizePopulation,
 			std::vector<std::vector<unsigned>>& population);
