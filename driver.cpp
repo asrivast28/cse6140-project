@@ -4,7 +4,7 @@
 #include "BranchAndBound.hpp"
 #include "MSTApproximation.hpp"
 #include "GreedyHeuristic.hpp"
-
+#include "GeneticAlgorithm.hpp"
 
 #include <fstream>
 #include <iostream>
@@ -89,6 +89,18 @@ main(
   else if (algorithm == "LS1") {
   }
   else if (algorithm == "LS2") {
+	  std::ofstream trcFile(trcFileName.str());
+
+	  timer.start();
+	  GeneticAlgorithm* geneticAlgorithm = new GeneticAlgorithm(tsp.dimension(),
+			  tsp.distanceMatrix(),
+			  options.cutoffTime(),
+			  &trcFile,
+			  &timer,
+			  options.randomSeed());
+	  tourCost = geneticAlgorithm->solve(tour);
+//	  tourCost = geneticAlgorithm.solve(tour);
+	  timer.stop();
   }
   else {
     std::cerr << "Unknown algorithm type '" << algorithm << "'." << std::endl;

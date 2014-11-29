@@ -38,31 +38,38 @@ private:
 	const Timer* m_timer;
 
 	unsigned m_bestCost;
+	std::vector<unsigned> m_bestTour;
 
 	std::minstd_rand m_rand;
+	unsigned m_randMax;
 
 	unsigned m_sizePopulation;
-
 	unsigned m_numGeneration;
-
 	double m_rateMutate;
+	unsigned m_sizeTournament;
+
+	std::vector<std::vector<unsigned>> m_distances;
 
 	void
 	initialPopulate(const unsigned sizePopulation,
-			std::vector<std::vector<unsigned>>& population);
+			std::vector<std::vector<unsigned>>& population,
+			std::vector<unsigned>& fitness,
+			unsigned& bestCost,
+			std::vector<unsigned>& bestTour);
 
-	void
+	unsigned
 	crossover(const std::vector<unsigned>& parent1,
 			const std::vector<unsigned>& parent2,
-			std::vector<unsigned>& child1,
-			std::vector<unsigned>& child2);
+			std::vector<unsigned>& child);
 
-	void
+	unsigned
 	mutate(std::vector<unsigned>& tour);
 
 	void
-	select(std::vector<std::vector<unsigned>>& population,
-			std::vector<std::vector<unsigned>>& selected);
+	select(const std::vector<std::vector<unsigned>>* population,
+			const std::vector<unsigned>* fitness,
+			std::vector<unsigned>& selected1,
+			std::vector<unsigned>& selected2);
 
 };
 
