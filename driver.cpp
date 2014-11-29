@@ -87,6 +87,20 @@ main(
     timer.stop();
   }
   else if (algorithm == "LS1") {
+	  std::ofstream trcFile(trcFileName.str());
+
+	  timer.start();
+
+	  GeneticAlgorithm* geneticAlgorithm = new GeneticAlgorithm(tsp.dimension(),
+			  tsp.distanceMatrix(),
+			  options.cutoffTime(),
+			  &trcFile,
+			  &timer,
+			  options.randomSeed());
+	  tourCost = geneticAlgorithm->solve(tour);
+	  delete geneticAlgorithm;
+
+	  timer.stop();
   }
   else if (algorithm == "LS2") {
 	  std::ofstream trcFile(trcFileName.str());
