@@ -35,10 +35,13 @@ GeneticAlgorithm::GeneticAlgorithm(const unsigned dimension,
 	m_randMax = m_rand.max();
 
 	// Sets the size of the population
-	m_sizePopulation = dimension*dimension/4;
+	m_sizePopulation = dimension*5;
+	if (m_sizePopulation > 1000) {
+		m_sizePopulation /= 2;
+	}
 
 	// Sets the number of generations
-	m_numGeneration = m_sizePopulation*16;
+	m_numGeneration = dimension*dimension*8;
 
 	// Sets the mutation rate
 	m_rateMutate = 0.05;
