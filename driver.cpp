@@ -92,6 +92,7 @@ main(
 	  std::ofstream trcFile(trcFileName.str());
 
 	  timer.start();
+
 	  GeneticAlgorithm* geneticAlgorithm = new GeneticAlgorithm(tsp.dimension(),
 			  tsp.distanceMatrix(),
 			  options.cutoffTime(),
@@ -99,7 +100,8 @@ main(
 			  &timer,
 			  options.randomSeed());
 	  tourCost = geneticAlgorithm->solve(tour);
-//	  tourCost = geneticAlgorithm.solve(tour);
+	  delete geneticAlgorithm;
+
 	  timer.stop();
   }
   else {

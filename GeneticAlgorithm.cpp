@@ -35,10 +35,10 @@ GeneticAlgorithm::GeneticAlgorithm(const unsigned dimension,
 	m_randMax = m_rand.max();
 
 	// Sets the size of the population
-	m_sizePopulation = dimension*dimension/8;
+	m_sizePopulation = dimension*dimension/4;
 
 	// Sets the number of generations
-	m_numGeneration = m_sizePopulation*4;
+	m_numGeneration = m_sizePopulation*16;
 
 	// Sets the mutation rate
 	m_rateMutate = 0.05;
@@ -121,7 +121,7 @@ GeneticAlgorithm::solve(std::vector<unsigned>& tour) {
 
 			// Mutation
 			// Randomly select genes to mutate
-//			newFitness = mutate(child);
+			newFitness = mutate(child, newFitness);
 
 			(*popChild)[jj] = child;
 			(*fitChild)[jj] = newFitness;
@@ -251,8 +251,78 @@ GeneticAlgorithm::crossover(const std::vector<unsigned>& parent1,
 }
 
 unsigned
-GeneticAlgorithm::mutate(std::vector<unsigned>& tour) {
-	return 0;
+GeneticAlgorithm::mutate(std::vector<unsigned>& tour, unsigned curCost) {
+
+	unsigned newCost = curCost;
+
+	for (unsigned ii = 0; ii < m_dimension; ii++) {
+
+		unsigned subtract1 = 0;
+		if (ii == 0) {
+			subtract1 += m_distances[tour[ii]][tour[ii + 1]];
+			subtract1 += m_distances[tour[ii]][tour[m_dimension - 1]];
+		} else if (ii == m_dimension - 1) {
+			subtract1 += m_distances[tour[ii - 1]][tour[ii]];
+			subtract1 += m_distances[tour[0]][tour[m_dimension - 1]];
+		} else {
+			subtract1 += m_distances[tour[ii - 1]][tour[ii]];
+			subtract1 += m_distances[tour[ii]][tour[ii + 1]];
+		}
+
+		if ((double)m_rand()/m_randMax < m_rateMutate) {
+
+			unsigned swapCity = (unsigned) ((double)m_rand()/m_randMax * m_dimension);
+			if (swapCity == m_dimension) {
+				swapCity = 0;
+			}
+			unsigned subtract2 = 0;
+
+			// Calculate new cost
+			// Subtract
+			if (swapCity == 0) {
+				subtract2 += m_distances[tour[swapCity]][tour[swapCity + 1]];
+				subtract2 += m_distances[tour[swapCity]][tour[m_dimension - 1]];
+			} else if (swapCity == m_dimension - 1) {
+				subtract2 += m_distances[tour[swapCity - 1]][tour[swapCity]];
+				subtract2 += m_distances[tour[0]][tour[m_dimension - 1]];
+			} else {
+				subtract2 += m_distances[tour[swapCity - 1]][tour[swapCity]];
+				subtract2 += m_distances[tour[swapCity]][tour[swapCity + 1]];
+			}
+
+			newCost -= (subtract1 + subtract2);
+
+			unsigned tmpCity = tour[ii];
+			tour[ii] = tour[swapCity];
+			tour[swapCity] = tmpCity;
+
+			// Addition of new paths
+			if (ii == 0) {
+				newCost += m_distances[tour[ii]][tour[ii + 1]];
+				newCost += m_distances[tour[ii]][tour[m_dimension - 1]];
+			} else if (ii == m_dimension - 1) {
+				newCost += m_distances[tour[ii - 1]][tour[ii]];
+				newCost += m_distances[tour[0]][tour[m_dimension - 1]];
+			} else {
+				newCost += m_distances[tour[ii - 1]][tour[ii]];
+				newCost += m_distances[tour[ii]][tour[ii + 1]];
+			}
+
+			if (swapCity == 0) {
+				newCost += m_distances[tour[swapCity]][tour[swapCity + 1]];
+				newCost += m_distances[tour[swapCity]][tour[m_dimension - 1]];
+			} else if (swapCity == m_dimension - 1) {
+				newCost += m_distances[tour[swapCity - 1]][tour[swapCity]];
+				newCost += m_distances[tour[0]][tour[m_dimension - 1]];
+			} else {
+				newCost += m_distances[tour[swapCity - 1]][tour[swapCity]];
+				newCost += m_distances[tour[swapCity]][tour[swapCity + 1]];
+			}
+
+		}
+	}
+
+	return newCost;
 }
 
 void

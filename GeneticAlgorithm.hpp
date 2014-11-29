@@ -63,7 +63,7 @@ private:
 			std::vector<unsigned>& child);
 
 	unsigned
-	mutate(std::vector<unsigned>& tour);
+	mutate(std::vector<unsigned>& tour, unsigned curCost);
 
 	void
 	select(const std::vector<std::vector<unsigned>>* population,
