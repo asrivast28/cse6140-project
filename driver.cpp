@@ -5,6 +5,7 @@
 #include "MSTApproximation.hpp"
 #include "GreedyHeuristic.hpp"
 #include "GeneticAlgorithm.hpp"
+#include "IteratedLocalSearch.hpp"
 
 #include <fstream>
 #include <iostream>
@@ -107,14 +108,14 @@ main(
 
 	  timer.start();
 
-	  GeneticAlgorithm* geneticAlgorithm = new GeneticAlgorithm(tsp.dimension(),
-			  tsp.distanceMatrix(),
-			  options.cutoffTime(),
-			  &trcFile,
-			  &timer,
-			  options.randomSeed());
-	  tourCost = geneticAlgorithm->solve(tour);
-	  delete geneticAlgorithm;
+	  IteratedLocalSearch LS2(
+	  			  tsp.dimension(),
+	  			  tsp.distanceMatrix(),
+	  			  options.cutoffTime(),
+	  			  &timer,
+	  			  &trcFile,
+	  			  options.randomSeed());
+	  tourCost = LS2.getTour(tour);
 
 	  timer.stop();
   }

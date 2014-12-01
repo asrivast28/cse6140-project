@@ -30,6 +30,7 @@ srcFiles = [
             'BranchAndBound.cpp',
             'GreedyHeuristic.cpp',
             'GeneticAlgorithm.cpp',
+            'IteratedLocalSearch.cpp',
             'driver.cpp',
             ]
 
