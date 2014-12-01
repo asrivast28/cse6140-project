@@ -22,10 +22,11 @@ class GreedyHeuristic {
 	    std::vector<unsigned>&
 	  ) const;
 
-	private:
 	void farthestInsertion(
-	  		  std::vector<unsigned>& tour
-	  		  )const;
+		  		  std::vector<unsigned>& tour
+		  		  )const;
+
+	private:
 
 	void displayVector(
 			std::vector<unsigned> v)const;

@@ -29,27 +29,28 @@ void
 		  )const
 {
 	unsigned minDist, maxDist, node, nodeInd;
-	unsigned minNode[2];
+	unsigned minNode[2], maxNode[2];
 
 	//displayDistMtx(m_dimension, m_distanceMatrix);
 
 	std::vector<unsigned> notInTour;
-	node = 1;
-	tour.push_back(node);	//add first node
 
 	maxDist = 0;
-	for (unsigned i = 2; i <= m_dimension; i++)		//add second node to tour s.t. it is at max dist from node 1
-		if(m_distanceMatrix[1][i] > maxDist)
-		{
-			maxDist = m_distanceMatrix[1][i];
-			node = i;
-			//std::cout << maxDist;
-		}
-	tour.push_back(node);
-	tour.push_back(1);			//complete the cycle
+	for (unsigned i = 1; i <= m_dimension; i++)
+		for (unsigned j = 1; j <= m_dimension; j++)		//add second node to tour s.t. it is at max dist from node 1
+			if(m_distanceMatrix[i][j] > maxDist)
+			{
+				maxDist = m_distanceMatrix[i][j];
+				maxNode[0] = i;
+				maxNode[1] = j;
+				//std::cout << maxDist;
+			}
+	tour.push_back(maxNode[0]);		//add first node
+	tour.push_back(maxNode[1]);
+	tour.push_back(maxNode[0]);			//complete the cycle
 
-	for (unsigned i = 2; i <= m_dimension; i++)		//add the remaining nodes to notIntour
-		if(i!= node)
+	for (unsigned i = 1; i <= m_dimension; i++)		//add the remaining nodes to notIntour
+		if((i!= maxNode[0])&&(i!=maxNode[1]))
 			notInTour.push_back(i);
 
 	while( notInTour.size() != 0)
@@ -95,7 +96,7 @@ unsigned GreedyHeuristic::getTour(
     approximateCost += m_distanceMatrix[tour[i]][tour[i+1]];
   }
   approximateCost += m_distanceMatrix[tour[0]][tour[m_dimension-1]];
-  // displayVector(tour);
+  displayVector(tour);
   return approximateCost;
 }
 

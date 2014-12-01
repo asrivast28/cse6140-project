@@ -36,11 +36,12 @@ TreeNode::TreeNode(unsigned size) {
 
 	// Initialize vector
 	for (unsigned ii = 0; ii < m_dimension; ii++) {
-		std::vector<char> destForOneCity(m_dimension);
+		std::vector<char> destForOneCity(m_dimension + 1);
 
-		for (unsigned jj = 0; jj < m_dimension; jj++) {
+		for (unsigned jj = 0; jj < m_dimension + 1; jj++) {
 			destForOneCity[jj] = 0;
 		}
+
 
 		m_constraint.push_back(destForOneCity);
 	}
@@ -109,7 +110,7 @@ TreeNode::calcLowerBound() {
 bool
 TreeNode::isSolution() {
 	// Find starting edge from node 1
-	unsigned u = 0, v = 0;
+	unsigned u = 0, v = MAX_UINT;
 	for (unsigned jj = 1; jj < m_dimension; jj++) {
 		if (m_constraint[0][jj] == 1) {
 			v = jj;
@@ -117,7 +118,7 @@ TreeNode::isSolution() {
 		}
 	}
 
-	if (v >= 0) {
+	if (v < MAX_UINT) {
 		return checkCycle(u, v) == m_dimension;
 	} else {
 		return false;
@@ -218,6 +219,12 @@ TreeNode::expand() {
 
 	// Exclude edges
 	for (unsigned ii = 0; ii < m_dimension; ii++) {
+
+		// Skip already finished cities
+		if (m_constraint[ii][m_dimension] == 1) {
+			continue;
+		}
+
 		// Count the from cities
 		int cntIncluded = 0;
 		for (unsigned jj = 0; jj < m_dimension; jj++) {
@@ -233,11 +240,19 @@ TreeNode::expand() {
 					m_constraint[jj][ii] = -1;
 				}
 			}
+
+			m_constraint[ii][m_dimension] = 1;
 		}
 	}
 
 	// Check premature cycle
 	for (unsigned ii = 0; ii < m_dimension; ii++) {
+
+		// Skip already finished cities
+		if (m_constraint[ii][m_dimension] == 1) {
+			continue;
+		}
+
 		for (unsigned jj = 0; jj < m_dimension; jj++) {
 			unsigned cycleDimension = checkCycle(ii, jj);
 			if (ii != jj && cycleDimension != 0 && cycleDimension < m_dimension
@@ -250,6 +265,12 @@ TreeNode::expand() {
 
 	// Include edges
 	for (unsigned ii = 0; ii < m_dimension; ii++) {
+
+		// Skip already finished cities
+		if (m_constraint[ii][m_dimension] == 1) {
+			continue;
+		}
+
 		unsigned cntExcluded = 0;
 		for (unsigned jj = 0; jj < m_dimension; jj++) {
 			if (ii != jj && m_constraint[ii][jj] == -1) {
@@ -264,6 +285,8 @@ TreeNode::expand() {
 					m_constraint[jj][ii] = 1;
 				}
 			}
+
+			m_constraint[ii][m_dimension] = 1;
 		}
 	}
 }
