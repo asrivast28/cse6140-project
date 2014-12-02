@@ -11,7 +11,7 @@
 #include "Timer.hpp"
 #include <algorithm>
 #include <boost/iterator/counting_iterator.hpp>
-#include <forward_list>
+#include <list>
 
 GeneticAlgorithm::GeneticAlgorithm(const unsigned dimension,
 		const std::vector<std::vector<unsigned>>& distanceMatrix,
@@ -210,11 +210,16 @@ GeneticAlgorithm::crossover(const std::vector<unsigned>& parent1,
 		endIdx = tmp;
 	}
 
-	std::forward_list<unsigned> fromParent1;
-	std::forward_list<unsigned>::iterator itr = fromParent1.before_begin();
+	std::list<unsigned> fromParent1;
+	std::list<unsigned>::iterator itr = fromParent1.begin();
 	for (unsigned ii = startIdx; ii <= endIdx; ii++) {
-		itr = fromParent1.insert_after(itr, parent1[ii]);
+		fromParent1.push_back(parent1[ii]);
 	}
+//	std::forward_list<unsigned> fromParent1;
+//	std::forward_list<unsigned>::iterator itr = fromParent1.before_begin();
+//	for (unsigned ii = startIdx; ii <= endIdx; ii++) {
+//		itr = fromParent1.insert_after(itr, parent1[ii]);
+//	}
 
 	unsigned curCost = 0;
 	unsigned idxParent2 = 0;
@@ -225,14 +230,13 @@ GeneticAlgorithm::crossover(const std::vector<unsigned>& parent1,
 				isExist = false;
 
 //				for (std::forward_list<unsigned>::iterator itrFind = fromParent1.begin(); itrFind != fromParent1.end(); itrFind++) {
-
 //					if ((*itrFind) == parent2[idxParent2]) {
-				if (std::find(fromParent1.begin(), fromParent1.end(), parent2[idxParent2]) != fromParent1.end()) {
+				itr = std::find(fromParent1.begin(), fromParent1.end(), parent2[idxParent2]);
+				if (itr != fromParent1.end()) {
+					fromParent1.erase(itr);
 					isExist = true;
 					idxParent2++;
-//					break;
 				}
-//				}
 			}
 
 			child[ii] = parent2[idxParent2];
