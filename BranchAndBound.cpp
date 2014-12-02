@@ -30,7 +30,8 @@ BranchAndBound::BranchAndBound(const unsigned dimension,
 		m_cutoffTime = 300;
 	}
 
-	this->m_bestCost = std::numeric_limits<unsigned>::max();
+//	this->m_bestCost = std::numeric_limits<unsigned>::max();
+	this->m_bestCost = initialCost;
 	this->m_numGeneratedNodes = 0;
 	this->m_numPrunedNodes = 0;
 	this->m_bestNode = nullptr;
