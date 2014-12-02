@@ -23,7 +23,9 @@ public:
 			const unsigned cutoffTime,
 			std::ofstream* trcFile,
 			const Timer* timer,
-			const unsigned randomSeed);
+			const unsigned randomSeed,
+			const std::vector<unsigned>& initialCosts,
+			const std::vector<std::vector<unsigned>>& initialTours);
 
 	unsigned
 	solve(std::vector<unsigned>& tour);
@@ -39,6 +41,9 @@ private:
 
 	unsigned m_bestCost;
 	std::vector<unsigned> m_bestTour;
+
+	std::vector<unsigned> m_initialCosts;
+	std::vector<std::vector<unsigned>> m_initialTours;
 
 	std::minstd_rand m_rand;
 	unsigned m_randMax;

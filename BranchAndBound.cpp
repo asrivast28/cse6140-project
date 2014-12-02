@@ -17,7 +17,9 @@ BranchAndBound::BranchAndBound(const unsigned dimension,
 		const std::vector<std::vector<unsigned>>& distanceMatrix,
 		const unsigned cutoffTime,
 		std::ofstream* trcFile,
-		const Timer* timer)
+		const Timer* timer,
+		const unsigned initialCost,
+		const std::vector<unsigned>& initialTour)
 		: m_dimension(dimension),
 		  m_cutoffTime(cutoffTime),
 		  m_trcFile(trcFile),
@@ -28,10 +30,12 @@ BranchAndBound::BranchAndBound(const unsigned dimension,
 		m_cutoffTime = 300;
 	}
 
-	this->m_bestCost = std::numeric_limits<unsigned>::max();
+//	this->m_bestCost = std::numeric_limits<unsigned>::max();
+	this->m_bestCost = initialCost;
 	this->m_numGeneratedNodes = 0;
 	this->m_numPrunedNodes = 0;
 	this->m_bestNode = nullptr;
+	this->m_initialTour = initialTour;
 
 	// Initialize the edge list
 	for (unsigned ii = 1; ii <= m_dimension; ii++) {
@@ -78,6 +82,8 @@ BranchAndBound::solve(std::vector<unsigned>& tour) {
 	if (m_bestNode != nullptr) {
 		tour = m_bestNode->getTour();
 		delete m_bestNode;
+	} else {
+		tour = m_initialTour;
 	}
 
 	std::cout << "Total generated node: " << m_numGeneratedNodes << std::endl;
