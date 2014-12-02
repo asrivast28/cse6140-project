@@ -18,7 +18,9 @@ GeneticAlgorithm::GeneticAlgorithm(const unsigned dimension,
 		const unsigned cutoffTime,
 		std::ofstream* trcFile,
 		const Timer* timer,
-		const unsigned randomSeed)
+		const unsigned randomSeed,
+		const std::vector<unsigned>& initialCosts,
+		const std::vector<std::vector<unsigned>>& initialTours)
 		: m_dimension(dimension),
 		  m_cutoffTime(cutoffTime),
 		  m_trcFile(trcFile),
@@ -33,6 +35,9 @@ GeneticAlgorithm::GeneticAlgorithm(const unsigned dimension,
 	// Initialize random number generator with given seed
 	m_rand.seed(randomSeed);
 	m_randMax = m_rand.max();
+
+	m_initialCosts = initialCosts;
+	m_initialTours = initialTours;
 
 	// Sets the size of the population
 	m_sizePopulation = dimension*5;
@@ -166,26 +171,32 @@ GeneticAlgorithm::initialPopulate(const unsigned sizePopulation,
 
 	for (unsigned ii = 0; ii < sizePopulation; ii++) {
 
-		// Make a new tour sequnce
-		std::vector<unsigned> indGene;
-		std::copy(boost::counting_iterator<unsigned>(0),
-				boost::counting_iterator<unsigned>(m_dimension),
-				std::back_inserter(indGene));
+		if (ii < m_initialTours.size()) {
+			fitness[ii] = m_initialCosts[ii];
+			population[ii] = m_initialTours[ii];
 
-		shuffle(indGene.begin(), indGene.end(), m_rand);
+		} else {
+			// Make a new tour sequnce
+			std::vector<unsigned> indGene;
+			std::copy(boost::counting_iterator<unsigned>(0),
+					boost::counting_iterator<unsigned>(m_dimension),
+					std::back_inserter(indGene));
 
-		// Calculate fitness
-		unsigned curDistance = m_distances[indGene[0]][indGene[m_dimension - 1]] ;
-		for (unsigned jj = 0; jj < m_dimension - 1; jj++) {
-			curDistance += m_distances[indGene[jj]][indGene[jj + 1]];
+			shuffle(indGene.begin(), indGene.end(), m_rand);
+
+			// Calculate fitness
+			unsigned curDistance = m_distances[indGene[0]][indGene[m_dimension - 1]] ;
+			for (unsigned jj = 0; jj < m_dimension - 1; jj++) {
+				curDistance += m_distances[indGene[jj]][indGene[jj + 1]];
+			}
+
+			fitness[ii] = curDistance;
+			population[ii] = indGene;
 		}
 
-		fitness[ii] = curDistance;
-		population[ii] = indGene;
-
-		if (curDistance < bestCost) {
-			bestCost = curDistance;
-			bestTour = indGene;
+		if (fitness[ii] < bestCost) {
+			bestCost = fitness[ii];
+			bestTour = population[ii];
 		}
 	}
 }
