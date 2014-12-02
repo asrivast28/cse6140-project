@@ -66,12 +66,19 @@ main(
   if (algorithm == "BnB") {
 	  std::ofstream trcFile(trcFileName.str());
 
+	  // Find initial bound using Heuristics
+	  GreedyHeuristic greedyAlgorithm(tsp.dimension(), tsp.distanceMatrix());
+	  std::vector<unsigned> initialTour;
+	  unsigned initialCost = greedyAlgorithm.getTour(initialTour);
+
 	  timer.start();
 	  BranchAndBound bnbAlgorithm(tsp.dimension(),
 			  tsp.distanceMatrix(),
 			  options.cutoffTime(),
 			  &trcFile,
-			  &timer);
+			  &timer,
+			  initialCost,
+			  initialTour);
 	  tourCost = bnbAlgorithm.solve(tour);
 	  timer.stop();
   }
