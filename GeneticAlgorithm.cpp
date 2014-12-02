@@ -36,7 +36,7 @@ GeneticAlgorithm::GeneticAlgorithm(const unsigned dimension,
 	m_rand.seed(randomSeed);
 	m_randMax = m_rand.max();
 
-	m_initialCosts = initialsCosts;
+	m_initialCosts = initialCosts;
 	m_initialTours = initialTours;
 
 	// Sets the size of the population
