@@ -171,12 +171,21 @@ GeneticAlgorithm::initialPopulate(const unsigned sizePopulation,
 
 	for (unsigned ii = 0; ii < sizePopulation; ii++) {
 
+		std::vector<unsigned> indGene;
+
 		if (ii < m_initialTours.size()) {
 			fitness[ii] = m_initialCosts[ii];
-			population[ii] = m_initialTours[ii];
+
+			std::vector<unsigned> curTour = m_initialTours[ii];
+			for (unsigned jj = 0; jj < m_dimension; jj++) {
+				indGene.push_back(curTour[jj] - 1);
+			}
+
+			population[ii] = indGene;
+
 		} else {
 			// Make a new tour sequnce
-			std::vector<unsigned> indGene;
+
 			std::copy(boost::counting_iterator<unsigned>(0),
 					boost::counting_iterator<unsigned>(m_dimension),
 					std::back_inserter(indGene));
@@ -195,7 +204,7 @@ GeneticAlgorithm::initialPopulate(const unsigned sizePopulation,
 
 		if (fitness[ii] < bestCost) {
 			bestCost = fitness[ii];
-			bestTour = population[ii];
+			bestTour = indGene;
 		}
 	}
 }
