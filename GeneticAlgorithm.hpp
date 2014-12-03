@@ -45,8 +45,8 @@ private:
 	std::vector<unsigned> m_initialCosts;
 	std::vector<std::vector<unsigned>> m_initialTours;
 
-	std::minstd_rand m_rand;
-	unsigned m_randMax;
+//	std::minstd_rand m_rand;
+//	unsigned m_randMax;
 
 	unsigned m_sizePopulation;
 	unsigned m_numGeneration;

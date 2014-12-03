@@ -13,6 +13,7 @@
 #include <boost/iterator/counting_iterator.hpp>
 #include <list>
 #include <map>
+#include <stdlib.h>
 
 GeneticAlgorithm::GeneticAlgorithm(const unsigned dimension,
 		const std::vector<std::vector<unsigned>>& distanceMatrix,
@@ -34,8 +35,10 @@ GeneticAlgorithm::GeneticAlgorithm(const unsigned dimension,
 	}
 
 	// Initialize random number generator with given seed
-	m_rand.seed(randomSeed);
-	m_randMax = m_rand.max();
+//	m_rand.seed(randomSeed);
+//	m_randMax = m_rand.max();
+	srand(randomSeed);
+
 
 	m_initialCosts = initialCosts;
 	m_initialTours = initialTours;
@@ -204,7 +207,8 @@ GeneticAlgorithm::initialPopulate(const unsigned sizePopulation,
 					boost::counting_iterator<unsigned>(m_dimension),
 					std::back_inserter(indGene));
 
-			shuffle(indGene.begin(), indGene.end(), m_rand);
+//			shuffle(indGene.begin(), indGene.end(), m_rand);
+			random_shuffle(indGene.begin(), indGene.end());
 
 			indGene.insert(indGene.begin(), 0);
 
@@ -230,8 +234,10 @@ GeneticAlgorithm::crossoverGNX(const std::vector<unsigned>& parent1,
 		const std::vector<unsigned>& parent2,
 		std::vector<unsigned>& child) {
 
-	unsigned startIdx = (unsigned) ((double)m_rand()/m_randMax * (m_dimension - 1)) + 1;
-	unsigned endIdx = (unsigned) ((double)m_rand()/m_randMax * (m_dimension - 1)) + 1;
+	unsigned startIdx = (unsigned) ((double)rand()/RAND_MAX * (m_dimension - 1)) + 1;
+	unsigned endIdx = (unsigned) ((double)rand()/RAND_MAX * (m_dimension - 1)) + 1;
+//	unsigned startIdx = (unsigned) ((double)m_rand()/m_randMax * (m_dimension - 1)) + 1;
+//	unsigned endIdx = (unsigned) ((double)m_rand()/m_randMax * (m_dimension - 1)) + 1;
 	if (startIdx == m_dimension) {
 		startIdx = 1;
 	}
@@ -367,9 +373,11 @@ GeneticAlgorithm::mutate(std::vector<unsigned>& tour, unsigned curCost) {
 			subtract1 += m_distances[tour[ii]][tour[ii + 1]];
 		}
 
-		if ((double)m_rand()/m_randMax < m_rateMutate) {
+		if ((double)rand()/RAND_MAX < m_rateMutate) {
+//		if ((double)m_rand()/m_randMax < m_rateMutate) {
 
-			unsigned swapCity = (unsigned) ((double)m_rand()/m_randMax * (m_dimension - 1)) + 1;
+			unsigned swapCity = (unsigned) ((double)rand()/RAND_MAX * (m_dimension - 1)) + 1;
+//			unsigned swapCity = (unsigned) ((double)m_rand()/m_randMax * (m_dimension - 1)) + 1;
 			if (swapCity == m_dimension) {
 				swapCity = 1;
 			}
@@ -436,7 +444,8 @@ GeneticAlgorithm::select(const std::vector<std::vector<unsigned>>* population,
 
 	// Tournament selection
 	for (unsigned ii = 0; ii < m_sizeTournament; ii++) {
-		unsigned randIdx = (unsigned) ((double)m_rand()/m_randMax * m_sizePopulation);
+		unsigned randIdx = (unsigned) ((double)rand()/RAND_MAX * m_sizePopulation);
+//		unsigned randIdx = (unsigned) ((double)m_rand()/m_randMax * m_sizePopulation);
 		if (randIdx == m_dimension) {
 			randIdx = 0;
 		}
@@ -451,7 +460,8 @@ GeneticAlgorithm::select(const std::vector<std::vector<unsigned>>* population,
 
 	// Tournament selection
 	for (unsigned ii = 0; ii < m_sizeTournament; ii++) {
-		unsigned randIdx = (unsigned) ((double)m_rand()/m_randMax * m_sizePopulation);
+		unsigned randIdx = (unsigned) ((double)rand()/RAND_MAX * m_sizePopulation);
+//		unsigned randIdx = (unsigned) ((double)m_rand()/m_randMax * m_sizePopulation);
 		if (randIdx == m_dimension) {
 			randIdx = 0;
 		}
