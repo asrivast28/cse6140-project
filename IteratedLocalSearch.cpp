@@ -157,9 +157,9 @@ void IteratedLocalSearch::localSearch( std::vector<unsigned>& tour
 			{
 				if(cost < m_best_cost)
 				{
-					std::cout<<"Better solution found with cost: "<<cost<<std::endl;
-					displayVector(tour);
-					std::cout<<fruitless_perturb<<std::endl;
+					std::cerr <<"Better solution found with cost: "<< cost << std::endl;
+					// displayVector(tour);
+					// std::cout<<fruitless_perturb<<std::endl;
 					// Save to the trace file
 					(*m_trcFile)<< m_timer->elapsed() << ", " << cost << std::endl;
 				}
@@ -171,7 +171,7 @@ void IteratedLocalSearch::localSearch( std::vector<unsigned>& tour
 		}
 
 	}
-	std::cout<<fruitless_perturb<<std::endl;
+	// std::cout<<fruitless_perturb<<std::endl;
 	tour = m_best_so_far_tour;
 	return;
 }
@@ -204,7 +204,7 @@ unsigned IteratedLocalSearch::getTour(
 		//tour.push_back(i);
 	//tour.push_back(1);
 
-	displayVector(tour);
+	// displayVector(tour);
 
 	localSearch(tour);
 
