@@ -66,12 +66,19 @@ main(
   if (algorithm == "BnB") {
 	  std::ofstream trcFile(trcFileName.str());
 
+	  // Find initial bound using Heuristics
+	  GreedyHeuristic greedyAlgorithm(tsp.dimension(), tsp.distanceMatrix());
+	  std::vector<unsigned> initialTour;
+	  unsigned initialCost = greedyAlgorithm.getTour(initialTour);
+
 	  timer.start();
 	  BranchAndBound bnbAlgorithm(tsp.dimension(),
 			  tsp.distanceMatrix(),
 			  options.cutoffTime(),
 			  &trcFile,
-			  &timer);
+			  &timer,
+			  initialCost,
+			  initialTour);
 	  tourCost = bnbAlgorithm.solve(tour);
 	  timer.stop();
   }
@@ -90,6 +97,25 @@ main(
   else if (algorithm == "LS1") {
 	  std::ofstream trcFile(trcFileName.str());
 
+	  std::vector<unsigned> initialCosts;
+	  std::vector<std::vector<unsigned>> initialTours;
+
+	  // Find initial good guess for the population
+	  GreedyHeuristic greedyAlgorithm(tsp.dimension(), tsp.distanceMatrix());
+	  std::vector<unsigned> initialTourHeur;
+	  unsigned initialCostHeur = greedyAlgorithm.getTour(initialTourHeur);
+
+	  initialCosts.push_back(initialCostHeur);
+	  initialTours.push_back(initialTourHeur);
+
+	  MSTApproximation approxAlgorithm(tsp.distanceMatrix(), tsp.dimension());
+	  std::vector<unsigned> initialTourAppr;
+	  unsigned initialCostAppr = approxAlgorithm.getTour(initialTourAppr);
+
+	  initialCosts.push_back(initialCostAppr);
+	  initialTours.push_back(initialTourAppr);
+
+
 	  timer.start();
 
 	  GeneticAlgorithm* geneticAlgorithm = new GeneticAlgorithm(tsp.dimension(),
@@ -97,7 +123,9 @@ main(
 			  options.cutoffTime(),
 			  &trcFile,
 			  &timer,
-			  options.randomSeed());
+			  options.randomSeed(),
+			  initialCosts,
+			  initialTours);
 	  tourCost = geneticAlgorithm->solve(tour);
 	  delete geneticAlgorithm;
 

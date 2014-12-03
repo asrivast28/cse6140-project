@@ -1,3 +1,5 @@
+boost*
 /builds
 /.sconsign.dblite
 /Debug
+boost/

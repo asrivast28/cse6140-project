@@ -22,7 +22,9 @@ public:
 			const std::vector<std::vector<unsigned>>& distanceMatrix,
 			const unsigned cutoffTime,
 			std::ofstream* trcFile,
-			const Timer* timer);
+			const Timer* timer,
+			const unsigned initialCost,
+			const std::vector<unsigned>& initialTour);
 
 	unsigned
 	solve(std::vector<unsigned>& tour);
@@ -41,6 +43,8 @@ private:
 	std::ofstream* m_trcFile;
 
 	const Timer* m_timer;
+
+	std::vector<unsigned> m_initialTour;
 
 
 	void

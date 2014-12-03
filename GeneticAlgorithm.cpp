@@ -11,14 +11,16 @@
 #include "Timer.hpp"
 #include <algorithm>
 #include <boost/iterator/counting_iterator.hpp>
-#include <forward_list>
+#include <list>
 
 GeneticAlgorithm::GeneticAlgorithm(const unsigned dimension,
 		const std::vector<std::vector<unsigned>>& distanceMatrix,
 		const unsigned cutoffTime,
 		std::ofstream* trcFile,
 		const Timer* timer,
-		const unsigned randomSeed)
+		const unsigned randomSeed,
+		const std::vector<unsigned>& initialCosts,
+		const std::vector<std::vector<unsigned>>& initialTours)
 		: m_dimension(dimension),
 		  m_cutoffTime(cutoffTime),
 		  m_trcFile(trcFile),
@@ -33,6 +35,9 @@ GeneticAlgorithm::GeneticAlgorithm(const unsigned dimension,
 	// Initialize random number generator with given seed
 	m_rand.seed(randomSeed);
 	m_randMax = m_rand.max();
+
+	m_initialCosts = initialCosts;
+	m_initialTours = initialTours;
 
 	// Sets the size of the population
 	m_sizePopulation = dimension*5;
@@ -166,25 +171,39 @@ GeneticAlgorithm::initialPopulate(const unsigned sizePopulation,
 
 	for (unsigned ii = 0; ii < sizePopulation; ii++) {
 
-		// Make a new tour sequnce
 		std::vector<unsigned> indGene;
-		std::copy(boost::counting_iterator<unsigned>(0),
-				boost::counting_iterator<unsigned>(m_dimension),
-				std::back_inserter(indGene));
 
-		shuffle(indGene.begin(), indGene.end(), m_rand);
+		if (ii < m_initialTours.size()) {
+			fitness[ii] = m_initialCosts[ii];
 
-		// Calculate fitness
-		unsigned curDistance = m_distances[indGene[0]][indGene[m_dimension - 1]] ;
-		for (unsigned jj = 0; jj < m_dimension - 1; jj++) {
-			curDistance += m_distances[indGene[jj]][indGene[jj + 1]];
+			std::vector<unsigned> curTour = m_initialTours[ii];
+			for (unsigned jj = 0; jj < m_dimension; jj++) {
+				indGene.push_back(curTour[jj] - 1);
+			}
+
+			population[ii] = indGene;
+
+		} else {
+			// Make a new tour sequnce
+
+			std::copy(boost::counting_iterator<unsigned>(0),
+					boost::counting_iterator<unsigned>(m_dimension),
+					std::back_inserter(indGene));
+
+			shuffle(indGene.begin(), indGene.end(), m_rand);
+
+			// Calculate fitness
+			unsigned curDistance = m_distances[indGene[0]][indGene[m_dimension - 1]] ;
+			for (unsigned jj = 0; jj < m_dimension - 1; jj++) {
+				curDistance += m_distances[indGene[jj]][indGene[jj + 1]];
+			}
+
+			fitness[ii] = curDistance;
+			population[ii] = indGene;
 		}
 
-		fitness[ii] = curDistance;
-		population[ii] = indGene;
-
-		if (curDistance < bestCost) {
-			bestCost = curDistance;
+		if (fitness[ii] < bestCost) {
+			bestCost = fitness[ii];
 			bestTour = indGene;
 		}
 	}
@@ -210,11 +229,16 @@ GeneticAlgorithm::crossover(const std::vector<unsigned>& parent1,
 		endIdx = tmp;
 	}
 
-	std::forward_list<unsigned> fromParent1;
-	std::forward_list<unsigned>::iterator itr = fromParent1.before_begin();
+	std::list<unsigned> fromParent1;
+	std::list<unsigned>::iterator itr = fromParent1.begin();
 	for (unsigned ii = startIdx; ii <= endIdx; ii++) {
-		itr = fromParent1.insert_after(itr, parent1[ii]);
+		fromParent1.push_back(parent1[ii]);
 	}
+//	std::forward_list<unsigned> fromParent1;
+//	std::forward_list<unsigned>::iterator itr = fromParent1.before_begin();
+//	for (unsigned ii = startIdx; ii <= endIdx; ii++) {
+//		itr = fromParent1.insert_after(itr, parent1[ii]);
+//	}
 
 	unsigned curCost = 0;
 	unsigned idxParent2 = 0;
@@ -225,14 +249,13 @@ GeneticAlgorithm::crossover(const std::vector<unsigned>& parent1,
 				isExist = false;
 
 //				for (std::forward_list<unsigned>::iterator itrFind = fromParent1.begin(); itrFind != fromParent1.end(); itrFind++) {
-
 //					if ((*itrFind) == parent2[idxParent2]) {
-				if (std::find(fromParent1.begin(), fromParent1.end(), parent2[idxParent2]) != fromParent1.end()) {
+				itr = std::find(fromParent1.begin(), fromParent1.end(), parent2[idxParent2]);
+				if (itr != fromParent1.end()) {
+					fromParent1.erase(itr);
 					isExist = true;
 					idxParent2++;
-//					break;
 				}
-//				}
 			}
 
 			child[ii] = parent2[idxParent2];
