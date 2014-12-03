@@ -197,9 +197,11 @@ unsigned IteratedLocalSearch::getTour(
 	GreedyHeuristic greedy_obj(m_dimension,std::move(m_distanceMatrix));
 
 	srand(m_seed);
-	//greedy_obj.farthestInsertion(tour);
-	for (unsigned i = 1; i <=m_dimension;i++)
-		tour.push_back(i);
+	greedy_obj.farthestInsertion(tour);
+	unsigned cost = tourCost(tour);
+	(*m_trcFile)<< m_timer->elapsed() << ", " << cost << std::endl;
+	//for (unsigned i = 1; i <=m_dimension;i++)
+		//tour.push_back(i);
 	//tour.push_back(1);
 
 	displayVector(tour);
