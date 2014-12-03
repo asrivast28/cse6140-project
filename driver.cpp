@@ -97,6 +97,22 @@ main(
   else if (algorithm == "LS1") {
 	  std::ofstream trcFile(trcFileName.str());
 
+	  timer.start();
+
+	  IteratedLocalSearch LS2(
+	  			  tsp.dimension(),
+	  			  tsp.distanceMatrix(),
+	  			  options.cutoffTime(),
+	  			  &timer,
+	  			  &trcFile,
+	  			  options.randomSeed());
+	  tourCost = LS2.getTour(tour);
+
+	  timer.stop();
+  }
+  else if (algorithm == "LS2") {
+	  std::ofstream trcFile(trcFileName.str());
+
 	  std::vector<unsigned> initialCosts;
 	  std::vector<std::vector<unsigned>> initialTours;
 
@@ -128,22 +144,6 @@ main(
 			  initialTours);
 	  tourCost = geneticAlgorithm->solve(tour);
 	  delete geneticAlgorithm;
-
-	  timer.stop();
-  }
-  else if (algorithm == "LS2") {
-	  std::ofstream trcFile(trcFileName.str());
-
-	  timer.start();
-
-	  IteratedLocalSearch LS2(
-	  			  tsp.dimension(),
-	  			  tsp.distanceMatrix(),
-	  			  options.cutoffTime(),
-	  			  &timer,
-	  			  &trcFile,
-	  			  options.randomSeed());
-	  tourCost = LS2.getTour(tour);
 
 	  timer.stop();
   }

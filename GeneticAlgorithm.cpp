@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <boost/iterator/counting_iterator.hpp>
 #include <list>
+#include <map>
 
 GeneticAlgorithm::GeneticAlgorithm(const unsigned dimension,
 		const std::vector<std::vector<unsigned>>& distanceMatrix,
@@ -40,16 +41,16 @@ GeneticAlgorithm::GeneticAlgorithm(const unsigned dimension,
 	m_initialTours = initialTours;
 
 	// Sets the size of the population
-	m_sizePopulation = dimension*5;
+	m_sizePopulation = dimension*3;
 	if (m_sizePopulation > 1000) {
 		m_sizePopulation /= 2;
 	}
 
 	// Sets the number of generations
-	m_numGeneration = dimension*dimension*8;
+	m_numGeneration = dimension*dimension*16;
 
 	// Sets the mutation rate
-	m_rateMutate = 0.05;
+	m_rateMutate = 0.1;
 
 	// Set the size of tournaments
 	m_sizeTournament = m_sizePopulation/10;
@@ -125,7 +126,7 @@ GeneticAlgorithm::solve(std::vector<unsigned>& tour) {
 			select(popParent, fitParent, selected1, selected2);
 
 			// Crossover
-			newFitness = crossover(selected1, selected2, child);
+			newFitness = crossoverSCX(selected1, selected2, child);
 
 			// Mutation
 			// Randomly select genes to mutate
@@ -177,20 +178,35 @@ GeneticAlgorithm::initialPopulate(const unsigned sizePopulation,
 			fitness[ii] = m_initialCosts[ii];
 
 			std::vector<unsigned> curTour = m_initialTours[ii];
+
+			// Find the city 1
+			unsigned offset = 0;
 			for (unsigned jj = 0; jj < m_dimension; jj++) {
-				indGene.push_back(curTour[jj] - 1);
+				if (curTour[jj] == 1) {
+					offset = jj;
+					break;
+				}
+			}
+
+			for (unsigned jj = 0; jj < m_dimension; jj++) {
+				if (jj + offset < m_dimension) {
+					indGene.push_back(curTour[jj + offset] - 1);
+				} else {
+					indGene.push_back(curTour[jj + offset - m_dimension] - 1);
+				}
 			}
 
 			population[ii] = indGene;
 
 		} else {
 			// Make a new tour sequnce
-
-			std::copy(boost::counting_iterator<unsigned>(0),
+			std::copy(boost::counting_iterator<unsigned>(1),
 					boost::counting_iterator<unsigned>(m_dimension),
 					std::back_inserter(indGene));
 
 			shuffle(indGene.begin(), indGene.end(), m_rand);
+
+			indGene.insert(indGene.begin(), 0);
 
 			// Calculate fitness
 			unsigned curDistance = m_distances[indGene[0]][indGene[m_dimension - 1]] ;
@@ -210,17 +226,17 @@ GeneticAlgorithm::initialPopulate(const unsigned sizePopulation,
 }
 
 unsigned
-GeneticAlgorithm::crossover(const std::vector<unsigned>& parent1,
+GeneticAlgorithm::crossoverGNX(const std::vector<unsigned>& parent1,
 		const std::vector<unsigned>& parent2,
 		std::vector<unsigned>& child) {
 
-	unsigned startIdx = (unsigned) ((double)m_rand()/m_randMax * m_dimension);
-	unsigned endIdx = (unsigned) ((double)m_rand()/m_randMax * m_dimension);
+	unsigned startIdx = (unsigned) ((double)m_rand()/m_randMax * (m_dimension - 1)) + 1;
+	unsigned endIdx = (unsigned) ((double)m_rand()/m_randMax * (m_dimension - 1)) + 1;
 	if (startIdx == m_dimension) {
-		startIdx = 0;
+		startIdx = 1;
 	}
 	if (endIdx == m_dimension) {
-		endIdx = 0;
+		endIdx = 1;
 	}
 
 	if (startIdx > endIdx) {
@@ -234,22 +250,16 @@ GeneticAlgorithm::crossover(const std::vector<unsigned>& parent1,
 	for (unsigned ii = startIdx; ii <= endIdx; ii++) {
 		fromParent1.push_back(parent1[ii]);
 	}
-//	std::forward_list<unsigned> fromParent1;
-//	std::forward_list<unsigned>::iterator itr = fromParent1.before_begin();
-//	for (unsigned ii = startIdx; ii <= endIdx; ii++) {
-//		itr = fromParent1.insert_after(itr, parent1[ii]);
-//	}
 
 	unsigned curCost = 0;
-	unsigned idxParent2 = 0;
-	for (unsigned ii = 0; ii < m_dimension; ii++) {
+	unsigned idxParent2 = 1;
+	child[0] = 0;
+	for (unsigned ii = 1; ii < m_dimension; ii++) {
 		if (ii < startIdx || ii > endIdx) {
 			bool isExist = true;
 			while (isExist) {
 				isExist = false;
 
-//				for (std::forward_list<unsigned>::iterator itrFind = fromParent1.begin(); itrFind != fromParent1.end(); itrFind++) {
-//					if ((*itrFind) == parent2[idxParent2]) {
 				itr = std::find(fromParent1.begin(), fromParent1.end(), parent2[idxParent2]);
 				if (itr != fromParent1.end()) {
 					fromParent1.erase(itr);
@@ -277,16 +287,78 @@ GeneticAlgorithm::crossover(const std::vector<unsigned>& parent1,
 }
 
 unsigned
+GeneticAlgorithm::crossoverSCX(const std::vector<unsigned>& parent1,
+		const std::vector<unsigned>& parent2,
+		std::vector<unsigned>& child) {
+
+	unsigned newCost = 0;
+
+	std::map<unsigned, unsigned> mapParent1;
+	std::map<unsigned, unsigned> mapParent2;
+	std::vector<unsigned> remaining(m_dimension);
+
+	for (unsigned ii = 0; ii < m_dimension - 1; ii++) {
+		mapParent1[parent1[ii]] = parent1[ii + 1];
+		mapParent2[parent2[ii]] = parent2[ii + 1];
+		remaining[ii] = 1;
+	}
+	mapParent1[parent1[m_dimension - 1]] = parent1[0];
+	mapParent2[parent2[m_dimension - 1]] = parent2[0];
+	remaining[m_dimension - 1] = 1;
+
+	// loop
+	unsigned firstAvailable = 1;
+	child[0] = 0;
+	remaining[0] = 0;
+
+	for (unsigned ii = 1; ii < m_dimension; ii++) {
+
+		unsigned candidate1 = mapParent1[child[ii - 1]];
+		unsigned candidate2 = mapParent2[child[ii - 1]];
+
+		if (remaining[candidate1] != 1) {
+			candidate1 = firstAvailable;
+		}
+
+		if (remaining[candidate2] != 1) {
+			candidate2 = firstAvailable;
+		}
+
+		// select better one
+		unsigned dist1 = m_distances[child[ii - 1]][candidate1];
+		unsigned dist2 = m_distances[child[ii - 1]][candidate2];
+
+		if (dist1 <= dist2) {
+			child[ii] = candidate1;
+			remaining[candidate1] = 0;
+			newCost += dist1;
+		} else {
+			child[ii] = candidate2;
+			remaining[candidate2] = 0;
+			newCost += dist2;
+		}
+
+		while(remaining[firstAvailable] == 0) {
+			firstAvailable++;
+		}
+	}
+
+	newCost += m_distances[child[0]][child[m_dimension - 1]];
+
+	return newCost;
+}
+
+unsigned
 GeneticAlgorithm::mutate(std::vector<unsigned>& tour, unsigned curCost) {
 
 	unsigned newCost = curCost;
 
-	for (unsigned ii = 0; ii < m_dimension; ii++) {
+	for (unsigned ii = 1; ii < m_dimension; ii++) {
 
 		unsigned subtract1 = 0;
-		if (ii == 0) {
+		if (ii == 1) {
 			subtract1 += m_distances[tour[ii]][tour[ii + 1]];
-			subtract1 += m_distances[tour[ii]][tour[m_dimension - 1]];
+			subtract1 += m_distances[tour[ii]][tour[0]];
 		} else if (ii == m_dimension - 1) {
 			subtract1 += m_distances[tour[ii - 1]][tour[ii]];
 			subtract1 += m_distances[tour[0]][tour[m_dimension - 1]];
@@ -297,17 +369,17 @@ GeneticAlgorithm::mutate(std::vector<unsigned>& tour, unsigned curCost) {
 
 		if ((double)m_rand()/m_randMax < m_rateMutate) {
 
-			unsigned swapCity = (unsigned) ((double)m_rand()/m_randMax * m_dimension);
+			unsigned swapCity = (unsigned) ((double)m_rand()/m_randMax * (m_dimension - 1)) + 1;
 			if (swapCity == m_dimension) {
-				swapCity = 0;
+				swapCity = 1;
 			}
 			unsigned subtract2 = 0;
 
 			// Calculate new cost
 			// Subtract
-			if (swapCity == 0) {
+			if (swapCity == 1) {
 				subtract2 += m_distances[tour[swapCity]][tour[swapCity + 1]];
-				subtract2 += m_distances[tour[swapCity]][tour[m_dimension - 1]];
+				subtract2 += m_distances[tour[swapCity]][tour[0]];
 			} else if (swapCity == m_dimension - 1) {
 				subtract2 += m_distances[tour[swapCity - 1]][tour[swapCity]];
 				subtract2 += m_distances[tour[0]][tour[m_dimension - 1]];
@@ -323,9 +395,9 @@ GeneticAlgorithm::mutate(std::vector<unsigned>& tour, unsigned curCost) {
 			tour[swapCity] = tmpCity;
 
 			// Addition of new paths
-			if (ii == 0) {
+			if (ii == 1) {
 				newCost += m_distances[tour[ii]][tour[ii + 1]];
-				newCost += m_distances[tour[ii]][tour[m_dimension - 1]];
+				newCost += m_distances[tour[ii]][tour[0]];
 			} else if (ii == m_dimension - 1) {
 				newCost += m_distances[tour[ii - 1]][tour[ii]];
 				newCost += m_distances[tour[0]][tour[m_dimension - 1]];
@@ -334,9 +406,9 @@ GeneticAlgorithm::mutate(std::vector<unsigned>& tour, unsigned curCost) {
 				newCost += m_distances[tour[ii]][tour[ii + 1]];
 			}
 
-			if (swapCity == 0) {
+			if (swapCity == 1) {
 				newCost += m_distances[tour[swapCity]][tour[swapCity + 1]];
-				newCost += m_distances[tour[swapCity]][tour[m_dimension - 1]];
+				newCost += m_distances[tour[swapCity]][tour[0]];
 			} else if (swapCity == m_dimension - 1) {
 				newCost += m_distances[tour[swapCity - 1]][tour[swapCity]];
 				newCost += m_distances[tour[0]][tour[m_dimension - 1]];

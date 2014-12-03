@@ -63,7 +63,12 @@ private:
 			std::vector<unsigned>& bestTour);
 
 	unsigned
-	crossover(const std::vector<unsigned>& parent1,
+	crossoverGNX(const std::vector<unsigned>& parent1,
+			const std::vector<unsigned>& parent2,
+			std::vector<unsigned>& child);
+
+	unsigned
+	crossoverSCX(const std::vector<unsigned>& parent1,
 			const std::vector<unsigned>& parent2,
 			std::vector<unsigned>& child);
 
