@@ -1,5 +1,5 @@
-set term png size 800,600
-set output 'gr202-LS1-sqd.png'
+set terminal postscript enhanced monochrome dashed
+set output 'gr202-LS1-sqd.eps'
 
 set grid
 

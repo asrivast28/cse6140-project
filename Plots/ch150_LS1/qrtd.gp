@@ -1,5 +1,5 @@
-set term png size 800,600
-set output 'ch150-LS1-qrtd.png'
+set terminal postscript enhanced monochrome dashed
+set output 'qrtd.eps'
 
 set grid
 
