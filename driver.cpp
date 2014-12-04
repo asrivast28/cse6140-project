@@ -99,14 +99,14 @@ main(
 
 	  timer.start();
 
-	  IteratedLocalSearch LS2(
+	  IteratedLocalSearch LS1(
 	  			  tsp.dimension(),
 	  			  tsp.distanceMatrix(),
 	  			  options.cutoffTime(),
 	  			  &timer,
 	  			  &trcFile,
 	  			  options.randomSeed());
-	  tourCost = LS2.getTour(tour);
+	  tourCost = LS1.getTour(tour);
 
 	  timer.stop();
   }
@@ -134,7 +134,7 @@ main(
 
 	  timer.start();
 
-	  GeneticAlgorithm* geneticAlgorithm = new GeneticAlgorithm(tsp.dimension(),
+	  GeneticAlgorithm geneticAlgorithm(tsp.dimension(),
 			  tsp.distanceMatrix(),
 			  options.cutoffTime(),
 			  &trcFile,
@@ -142,8 +142,7 @@ main(
 			  options.randomSeed(),
 			  initialCosts,
 			  initialTours);
-	  tourCost = geneticAlgorithm->solve(tour);
-	  delete geneticAlgorithm;
+	  tourCost = geneticAlgorithm.solve(tour);
 
 	  timer.stop();
   }

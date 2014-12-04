@@ -35,9 +35,9 @@ GeneticAlgorithm::GeneticAlgorithm(const unsigned dimension,
 	}
 
 	// Initialize random number generator with given seed
-//	m_rand.seed(randomSeed);
-//	m_randMax = m_rand.max();
-	srand(randomSeed);
+	m_rand.seed(randomSeed);
+	m_randMax = m_rand.max();
+//	srand(randomSeed);
 
 
 	m_initialCosts = initialCosts;
@@ -83,33 +83,17 @@ GeneticAlgorithm::solve(std::vector<unsigned>& tour) {
 	std::vector<unsigned> fitness1(m_sizePopulation);
 	std::vector<std::vector<unsigned>> population2(m_sizePopulation, std::vector<unsigned>(m_dimension, 0));
 	std::vector<unsigned> fitness2(m_sizePopulation);
-	std::vector<std::vector<unsigned>>* popParent = nullptr;
-	std::vector<unsigned>* fitParent = nullptr;
-	std::vector<std::vector<unsigned>>* popChild = nullptr;
-	std::vector<unsigned>* fitChild = nullptr;
 
 	std::vector<unsigned> selected1(m_dimension), selected2(m_dimension);
 
 	// Initialize the population
 	initialPopulate(m_sizePopulation, population1, fitness1, m_bestCost, m_bestTour);
+	(*m_trcFile) << m_timer->elapsed() << ", " << m_bestCost << std::endl;
 
 	// Evolution
 	for (unsigned ii = 0; ii < m_numGeneration; ii++) {
 
 		unsigned oldCost = m_bestCost;
-
-		if (ii % 2 == 0) {
-			popParent = &population1;
-			fitParent = &fitness1;
-			popChild = &population2;
-			fitChild = &fitness2;
-		} else {
-			popParent = &population2;
-			fitParent = &fitness2;
-			popChild = &population1;
-			fitChild = &fitness1;
-		}
-
 
 		// Handling cutoff time
 		if (m_timer->elapsed() > m_cutoffTime) {
@@ -117,8 +101,13 @@ GeneticAlgorithm::solve(std::vector<unsigned>& tour) {
 		}
 
 		// Eliticism - Keep the best one
-		(*popChild)[0] = m_bestTour;
-		(*fitChild)[0] = m_bestCost;
+		if (ii % 2 == 0) {
+			population2[0] = m_bestTour;
+			fitness2[0] = m_bestCost;
+		} else {
+			population1[0] = m_bestTour;
+			fitness1[0] = m_bestCost;
+		}
 
 		std::vector<unsigned> child(m_dimension);
 		unsigned newFitness = 0;
@@ -126,17 +115,31 @@ GeneticAlgorithm::solve(std::vector<unsigned>& tour) {
 		for (unsigned jj = 1; jj < m_sizePopulation; jj++) {
 
 			// Selection
-			select(popParent, fitParent, selected1, selected2);
+			if (ii % 2 == 0) {
+				select(population1, fitness1, selected1, selected2);
+			} else {
+				select(population2, fitness2, selected1, selected2);
+			}
 
 			// Crossover
 			newFitness = crossoverSCX(selected1, selected2, child);
 
-			// Mutation
-			// Randomly select genes to mutate
-			newFitness = mutate(child, newFitness);
+			// In case of new best solution, keep it and don't mutate
+			if (newFitness >= m_bestCost) {
 
-			(*popChild)[jj] = child;
-			(*fitChild)[jj] = newFitness;
+				// Mutation
+				// Randomly select genes to mutate
+				newFitness = mutate(child, newFitness);
+
+			}
+
+			if (ii % 2 == 0) {
+				population2[jj] = child;
+				fitness2[jj] = newFitness;
+			} else {
+				population1[jj] = child;
+				fitness1[jj] = newFitness;
+			}
 
 			// Update best tour
 			if (m_bestCost > newFitness) {
@@ -207,8 +210,8 @@ GeneticAlgorithm::initialPopulate(const unsigned sizePopulation,
 					boost::counting_iterator<unsigned>(m_dimension),
 					std::back_inserter(indGene));
 
-//			shuffle(indGene.begin(), indGene.end(), m_rand);
-			random_shuffle(indGene.begin(), indGene.end());
+			shuffle(indGene.begin(), indGene.end(), m_rand);
+//			random_shuffle(indGene.begin(), indGene.end());
 
 			indGene.insert(indGene.begin(), 0);
 
@@ -234,10 +237,10 @@ GeneticAlgorithm::crossoverGNX(const std::vector<unsigned>& parent1,
 		const std::vector<unsigned>& parent2,
 		std::vector<unsigned>& child) {
 
-	unsigned startIdx = (unsigned) ((double)rand()/RAND_MAX * (m_dimension - 1)) + 1;
-	unsigned endIdx = (unsigned) ((double)rand()/RAND_MAX * (m_dimension - 1)) + 1;
-//	unsigned startIdx = (unsigned) ((double)m_rand()/m_randMax * (m_dimension - 1)) + 1;
-//	unsigned endIdx = (unsigned) ((double)m_rand()/m_randMax * (m_dimension - 1)) + 1;
+//	unsigned startIdx = rand() % (m_dimension - 1) + 1; //(unsigned) ((double)rand()/RAND_MAX * (m_dimension - 1)) + 1;
+//	unsigned endIdx = rand() % (m_dimension - 1) + 1;
+	unsigned startIdx = m_rand() % (m_dimension - 1) + 1;
+	unsigned endIdx = m_rand() % (m_dimension - 1) + 1;
 	if (startIdx == m_dimension) {
 		startIdx = 1;
 	}
@@ -359,6 +362,7 @@ GeneticAlgorithm::mutate(std::vector<unsigned>& tour, unsigned curCost) {
 
 	unsigned newCost = curCost;
 
+
 	for (unsigned ii = 1; ii < m_dimension; ii++) {
 
 		unsigned subtract1 = 0;
@@ -373,11 +377,11 @@ GeneticAlgorithm::mutate(std::vector<unsigned>& tour, unsigned curCost) {
 			subtract1 += m_distances[tour[ii]][tour[ii + 1]];
 		}
 
-		if ((double)rand()/RAND_MAX < m_rateMutate) {
-//		if ((double)m_rand()/m_randMax < m_rateMutate) {
+//			if ((double)rand()/RAND_MAX < m_rateMutate) {
+		if ((double)m_rand()/m_randMax < m_rateMutate) {
 
-			unsigned swapCity = (unsigned) ((double)rand()/RAND_MAX * (m_dimension - 1)) + 1;
-//			unsigned swapCity = (unsigned) ((double)m_rand()/m_randMax * (m_dimension - 1)) + 1;
+//				unsigned swapCity = rand() % (m_dimension - 1) + 1;
+			unsigned swapCity = m_rand() % (m_dimension - 1) + 1;
 			if (swapCity == m_dimension) {
 				swapCity = 1;
 			}
@@ -426,14 +430,15 @@ GeneticAlgorithm::mutate(std::vector<unsigned>& tour, unsigned curCost) {
 			}
 
 		}
+
 	}
 
 	return newCost;
 }
 
 void
-GeneticAlgorithm::select(const std::vector<std::vector<unsigned>>* population,
-		const std::vector<unsigned>* fitness,
+GeneticAlgorithm::select(const std::vector<std::vector<unsigned>>& population,
+		const std::vector<unsigned>& fitness,
 		std::vector<unsigned>& selected1,
 		std::vector<unsigned>& selected2) {
 
@@ -444,33 +449,27 @@ GeneticAlgorithm::select(const std::vector<std::vector<unsigned>>* population,
 
 	// Tournament selection
 	for (unsigned ii = 0; ii < m_sizeTournament; ii++) {
-		unsigned randIdx = (unsigned) ((double)rand()/RAND_MAX * m_sizePopulation);
-//		unsigned randIdx = (unsigned) ((double)m_rand()/m_randMax * m_sizePopulation);
-		if (randIdx == m_dimension) {
-			randIdx = 0;
-		}
+//		unsigned randIdx = rand() % m_sizePopulation;
+		unsigned randIdx = m_rand() % m_sizePopulation;
 
-		curFitness = (*fitness)[randIdx];
+		curFitness = fitness[randIdx];
 		if (curFitness < chFitness1) {
 			chFitness1 = curFitness;
 
-			selected1 = (*population)[randIdx];
+			selected1 = population[randIdx];
 		}
 	}
 
 	// Tournament selection
 	for (unsigned ii = 0; ii < m_sizeTournament; ii++) {
-		unsigned randIdx = (unsigned) ((double)rand()/RAND_MAX * m_sizePopulation);
-//		unsigned randIdx = (unsigned) ((double)m_rand()/m_randMax * m_sizePopulation);
-		if (randIdx == m_dimension) {
-			randIdx = 0;
-		}
+//		unsigned randIdx = rand() % m_sizePopulation;
+		unsigned randIdx = m_rand() % m_sizePopulation;
 
-		curFitness = (*fitness)[randIdx];
+		curFitness = fitness[randIdx];
 		if (curFitness < chFitness2) {
 			chFitness2 = curFitness;
 
-			selected2 = (*population)[randIdx];
+			selected2 = population[randIdx];
 		}
 	}
 
