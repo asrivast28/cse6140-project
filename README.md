@@ -1,3 +1,7 @@
+# Select Approaches for Solving the Travelling Salesman Problem
+
+This project was undertaken as part of CSE 6140 - CSE Algorithms. The final report for the project can be found [here](report.pdf).
+
 ## Contributors
 
 * Parul Awasthy (<pawasthy@gatech.edu>)
